@@ -1,0 +1,187 @@
+html, body, aside, section, div.server-app, div.server-app > div {
+    height: 100%;
+}
+body {
+    background-color: black;
+    color: whitesmoke;
+}
+
+.server-list {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+    padding: 0;
+    margin: 0;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+ul {
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    list-style-type: none;
+}
+
+.button-group.server-controls {
+    justify-content: center;
+    display: flex;
+    margin: 8rem 0;
+}
+
+.button-group.server-controls > button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 1 50%;
+}
+
+@keyframes animateServer {
+    0% {
+    }
+    100% {
+    }
+}
+
+@keyframes idleServer {
+    0% {
+        background-color: #1e1e1e;
+    }
+    50% {
+        background-color: #2c2c2c;
+    }
+    100% {
+        background-color: #1e1e1e;
+    }
+}
+
+@keyframes applicationStart {
+    0% {
+        width: 0;
+        opacity: 0;
+    }
+    100% {
+        width: 100%;
+        opacity: 1;
+    }
+}
+
+.server {
+    min-width: 20rem;
+    max-width: 20rem;
+    min-height: 20rem;
+    background: #1e1e1e;
+    margin: 1rem;
+    display: flex;
+    flex: 1 1 auto;
+    border-radius: 0.61rem;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    overflow: hidden;
+    position: relative;
+    animation: idleServer 4s infinite;
+}
+
+.server > label {
+    margin: auto;
+    font-style: italic;
+}
+
+.badge.server-name {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.application {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 1.61rem;
+    align-items: center;
+    align-content: center;
+    width: 100%;
+    animation: applicationStart 0.5s ease-in-out;
+}
+
+.application > * {
+    margin: auto;
+}
+
+.server-controls span.glyphicon {
+    font-size: 4rem;
+}
+
+.application label {
+    text-align: center;
+    font-size: larger;
+    text-transform: uppercase;
+    text-shadow: 0px -1px 2px black;
+
+}
+
+.application p {
+    text-align: center;
+    font-size: small;
+}
+
+.Chronos {
+    background: linear-gradient(135deg, rgb(2, 208, 250) 0%, rgb(0, 136, 255) 100%);
+}
+.Hadoop {
+    background: linear-gradient(135deg, rgb(181, 17, 205) 0%, rgb(251, 1, 185) 100%);
+}
+.Spark {
+    background: linear-gradient(135deg, rgb(116, 255, 0) 0%, rgb(96, 229, 49) 100%);
+}
+.Rails {
+    background: linear-gradient(135deg, rgb(30, 53, 245) 0%, rgb(95, 36, 227) 100%);
+}
+.Storm {
+    background: linear-gradient(135deg, rgb(51, 229, 137) 0%, rgb(33, 221, 18) 100%);
+}
+
+.application-list {
+    margin: 8rem 0;
+}
+
+.application-button {
+    display: flex;
+    padding: 1rem 0;
+}
+
+.application-button button {
+    border: none;
+    border-radius: 50%;
+    align-content: center;
+    justify-content: center;
+    display: flex;
+    padding: 0.4rem;
+    margin: 0.2rem;
+}
+
+.application-button label {
+    flex: 1 1 auto;
+}
+
+aside {
+    background-color: #1e1e1e;
+}
+
+header.header {
+    flex-direction: row;
+    display: flex;
+    flex: 1 1 auto;
+}
+
+header.header input {
+    flex: 1 1 auto;
+    height: 2.4rem;
+    color: #1e1e1e;
+    margin: auto 2rem;
+    font-family: monospace;
+}
+
