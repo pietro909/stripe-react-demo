@@ -3,25 +3,30 @@ import { Provider } from 'react-redux'
 import { applyMiddleware, combineReducers, createStore } from 'redux';
 import { reducer as formReducer } from 'redux-form'
 import { render } from 'react-dom'
+import thunkMiddleware from 'redux-thunk'
+import createLogger from 'redux-logger'
 
-import {logger} from './middlewares/logging'
 import customers from './reducers/customers'
-import editor from './reducers/editor'
 import App from './containers/App'
+import listUpdater from './middlewares/listUpdater'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './styles.css'
 
+const loggerMiddleware = createLogger()
+
 const reducers = combineReducers({
   customers,
-  editor,
-  formReducer
+  form: formReducer
 })
-
  
 const store = createStore(
   reducers,
-  applyMiddleware(logger)
+  applyMiddleware(
+    thunkMiddleware,
+    loggerMiddleware,
+		listUpdater,
+  )
 );
 
 render(

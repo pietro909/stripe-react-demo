@@ -13,8 +13,15 @@ const App = ({customers, actions, message, selectedCustomer}) => {
     <article>
       <Header message={msgText} level={msgLevel} />
       <div className="row">
-        <AsideToolbar customers={customers} actions={actions} selectedCustomerId={selectedCustomer} />
-        <MainSection customers={customers} actions={actions} />
+        <AsideToolbar
+          actions={actions}
+          customers={customers}
+          selectedCustomerId={selectedCustomer}
+        />
+        <MainSection
+          customers={customers}
+          actions={actions}
+        />
       </div>
     </article>
   )

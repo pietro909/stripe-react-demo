@@ -1,23 +1,29 @@
 import React, { Component, PropTypes } from 'react'
-import moment from  'moment'
+import { compose } from 'redux'
+import { connect } from 'react-redux'
 
-export default class Customer extends Component {
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	clickHandler: () => ownProps.onClick(ownProps.id)
+})
+
+export class Customer extends Component {
 
   static propTypes = {
-    balance: Props.required.string
-    description: Props.required.string, 
-    email: Props.required.string, 
-    id: Props.required.string,
-    lastName: Props.required.string, 
-    name: Props.required.string, 
-    onClick: Props.function.required
+    balance: PropTypes.number.isRequired,
+    clickHandler: PropTypes.func.isRequired,
+    description: PropTypes.string.isRequired, 
+    email: PropTypes.string.isRequired, 
+    id: PropTypes.string.isRequired,
+    lastName: PropTypes.string.isRequired, 
+    name: PropTypes.string.isRequired, 
+    onClick: PropTypes.func.isRequired,
   }
 
   render() {
-    const { id, name, lastName, email, description, balance, onClick } = this.props
+    const { id, name, lastName, email, description, balance, clickHandler } = this.props
 
     return (
-      <li className="server" onClick={onClick}>
+      <li className="customer" onClick={clickHandler}>
         <span>{name}</span>
         <span>{lastName}</span>
         <span>{balance}</span>
@@ -27,3 +33,7 @@ export default class Customer extends Component {
     )
   }
 }
+
+export default compose(
+	connect(mapDispatchToProps),
+)(Customer)

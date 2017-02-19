@@ -1,11 +1,12 @@
 import {
+	LIST_UPDATED,
+  CREATE_CUSTOMER,
+  DELETE_CUSTOMER,
+  ERROR,
+  OK,
   SELECT_CUSTOMER,
   UNSELECT_CUSTOMER,
-  CREATE_CUSTOMER,
   UPDATE_CUSTOMER, 
-  DELETE_CUSTOMER,
-  OK,
-  ERROR
 } from '../constants/ActionTypes' 
 import * as Utils from './utils' 
 
@@ -40,7 +41,7 @@ export default function customers(state = initialState, action) {
 
     case SELECT_CUSTOMER:
       return Object.assign({}, state, {
-        selectedCustomer: action.payload.id
+        selectedCustomer: action.id
       })
 
     case UNSELECT_CUSTOMER:
@@ -54,27 +55,38 @@ export default function customers(state = initialState, action) {
       })
 
     case UPDATE_CUSTOMER: {
-      const id = action.payload.id
+      const id = action.id
       return Object.assign({}, state, {
         message: Utils.makeInfo(`Updating customer ${id}...`)
       })
     }
 
     case DELETE_CUSTOMER: {
-      const id = action.payload.id
+      const id = action.id
       return Object.assign({}, state, {
         message: Utils.makeWarning(`Deleting customer ${id}...`)
       })
     }
 
+		case LIST_UPDATED:
+			const customers = action.data.map(item => ({
+				balance: item.account_balance,
+				description: item.description,
+				email: item.email,
+				firstName: item.metadata.firstName,
+				id: item.id,
+				lastName: item.metadata.lastName,
+			}))
+			return Object.assign({}, state, { customers })
+
     case OK:
       return Object.assign({}, state, {
-        message: Utils.makeError(action.payload.message)
+        message: Utils.makeError(action.message)
       })
 
     case ERROR:
       return Object.assign({}, state, {
-        message: Utils.makeError(action.payload.message)
+        message: Utils.makeError(action.message)
       })
 
     default:

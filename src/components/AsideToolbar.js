@@ -1,46 +1,70 @@
 import React, { Component, PropTypes } from 'react'
+import { compose } from 'redux'
+import { connect } from 'react-redux'
 
-import Editor from './Editor'
+import { createCustomer, updateCustomer } from '../actions'
+import CustomerForm from './CustomerForm'
 
-export default class AsideToolbar extends Component {
+const mapStateToProps = (state, ownProps) => {
+	const id = state.selectedCustomerId
+	const actions = ownProps.actions
+	return {	
+		createCustomer: () => actions.createCustomer(id),
+		deleteCustomer: () => actions.deleteCustomer(id),
+		handleSubmit: values => {
+			if (id) {
+				ownProps.actions.updateCustomer(id, values)
+			} else {
+				ownProps.actions.createCustomer(values)
+			}
+		},
+		openEditor: () => actions.openEditor(id),
+		updateCustomer: () => actions.updateCustomer(id),
+		updateList: () => actions.updateList(),
+	}
+}
+
+class AsideToolbar extends Component {
+
   static propTypes = {
+		actions: PropTypes.object.isRequired,
+		createCustomer: PropTypes.func.isRequired,
+		deleteCustomer: PropTypes.func.isRequired,
+		handleSubmit: PropTypes.func.isRequired,
+		openEditor: PropTypes.func.isRequired,
+		selectedCustomerId: PropTypes.string,
+		updateCustomer: PropTypes.func.isRequired,
     customers: PropTypes.array.isRequired,
-    actions: PropTypes.object.isRequired,
-    selectedCustomerId: PropTypes.string
-    editorContent: PropTypes.object.isRequired
   }
-
-  submitCustomer() {
-    this.props.actions.createCustomer(this.props.editorContent)
-  }
-
+ 
   render() {
-    const { actions, customers, selectedCustomerId } = this.props
-    const selectedCustomer = customers.find(c => c.id === selectedCustomerId)
-    const onFieldUpdate = (e) => actions.updateField(e.target.name, e.target.value)
-    
+		const {
+			actions,
+			customers,
+			deleteCustomer,
+			handleSubmit,
+			openEditor,
+			selectedCustomerId,
+			updateCustomer,
+			updateList,
+		} = this.props
     return (
       <aside className="col-sm-4">
         <div className="button-group server-controls">
-          <button onClick={() => actions.openEditor(selectedCustomerId)} className="btn btn-default">
+          <button onClick={openEditor} className="btn btn-default">
             <span className="glyphicon glyphicon-plus-sign"></span>
-            <p>Add Server</p>
-          </button>
-          <button onClick={() => actions.deleteCustomer(selectedCustomerId)} className="btn btn-default">
-            <span className="glyphicon glyphicon-minus-sign"></span>
-            <p>Remove Server</p>
+            <p>Create customer</p>
           </button>
         </div>
-        <Editor
-          balance={selectedCustomer && selectedCustomer.balance}
-          description={selectedCustomer && selectedCustomer.description}
-          email={selectedCustomer && selectedCustomer.email}
-          firstName={selectedCustomer && selectedCustomer.firstName}
-          lastName={selectedCustomer && selectedCustomer.lastName}
-          onFieldUpdate={onFieldUpdate}
-          onSubmit={submitCustomer}
-        />
+        <CustomerForm onSubmit={handleSubmit} deleteCustomer={deleteCustomer}/>
      </aside>
     )
   }
 }
+
+export default compose(
+	connect(mapStateToProps),
+)(AsideToolbar)
+
+
+
