@@ -1,4 +1,4 @@
-import { initialize, autofill } from 'redux-form'
+import { reset, initialize, autofill } from 'redux-form'
 
 import * as API from '../constants/API'
 import {
@@ -7,6 +7,7 @@ import {
   UPDATE_CUSTOMER, 
   UPDATE_LIST,
 	SELECT_CUSTOMER,
+	UNSELECT_CUSTOMER,
 } from '../constants/ActionTypes' 
 import { updateList, resultOk, resultError, listUpdated } from '../actions'
 import * as selectors from '../selectors'
@@ -15,32 +16,8 @@ const listUpdater = ({ dispatch, getState }) => next => action => {
   const result = next(action)
 	switch(action.type) {
 
-		case CREATE_CUSTOMER:
-      API.create(action.customer)
-        .then(response => {
-          if (response.ok) {
-            dispatch(updateList())
-            return response.json()
-          }
-          throw new Error('Creation failed!')
-        })
-        .then(response => dispatch(resultOk('Customer created')))
-        .catch(reason => dispatch(resultError(reason)))
-      break
-
-		case UPDATE_CUSTOMER:
-      API.update(action.id, action.customer)
-        .then(response => {
-          if (response.ok) {
-            return response.json()
-          }
-          throw new Error('Update failed!')
-        })
-        .then(response => dispatch(resultOk('Customer updated')))
-        .catch(reason => dispatch(resultError(reason)))
-      break
-
 		case UPDATE_LIST:
+			dispatch(reset('customer'))
       API.list()
         .then(response => {
           if (response.ok) {
@@ -59,6 +36,8 @@ const listUpdater = ({ dispatch, getState }) => next => action => {
 			dispatch(initialize('customer', selectedCustomer))
 			break
 
+		case UNSELECT_CUSTOMER:
+			dispatch(initialize('customer'))
 	}
   return result
 }

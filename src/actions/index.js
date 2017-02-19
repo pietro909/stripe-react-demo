@@ -16,24 +16,32 @@ export const listUpdated = data => ({
 	data
 })
 
+export const unselectCustomer = () => ({ type: types.UNSELECT_CUSTOMER })
+
 export const resultOk = (message) => ({ type: types.OK, message })
 
 export const resultError = (message) => ({ type: types.ERROR, message })
 
-export const createCustomer = customer => ({
-	type: types.CREATE_CUSTOMER,
-	customer,
-})
-
-export const updateCustomer = (id,  customer) => ({
-	type: types.UPDATE_CUSTOMER,
-	customer, id
-})
-	/*
-	dispatch({ type: types.UPDATE_CUSTOMER })
-	return API.update(id, customer)
+export const createCustomer = customer => dispatch => {
+	dispatch({ type: types.CREATE_CUSTOMER, customer })
+	API.create(customer)
 		.then(response => {
 			if (response.ok) {
+				dispatch(updateList())
+				return response.json()
+			}
+			throw new Error('Creation failed!')
+		})
+		.then(response => dispatch(resultOk('Customer created')))
+		.catch(reason => dispatch(resultError(reason)))
+}
+
+export const updateCustomer = (id,  customer) => dispatch => {
+	dispatch({ type: types.UPDATE_CUSTOMER, customer, id })
+	API.update(id, customer)
+		.then(response => {
+			if (response.ok) {
+				dispatch(updateList())
 				return response.json()
 			}
 			throw new Error('Update failed!')
@@ -41,13 +49,13 @@ export const updateCustomer = (id,  customer) => ({
 		.then(response => dispatch(resultOk('Customer updated')))
 		.catch(reason => dispatch(resultError(reason)))
 }
-		*/
 
 export const deleteCustomer = id => dispatch => {
 	dispatch({ type: types.DELETE_CUSTOMER })
 	return API.remove(id)
 		.then(response => {
 			if (response.ok) {
+        dispatch(updateList())
 				return response.json()
 			}
 			throw new Error('Deletion failed!')

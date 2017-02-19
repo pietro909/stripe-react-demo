@@ -9,9 +9,10 @@ const CustomerForm = (props) => {
   const {
 		handleSubmit,
 		pristine,
-		reset,
 		submitting,
-		deleteCustomer
+		deleteCustomer,
+		cleanFields,
+		selectedCustomerId,
 	} = props
   return (
     <form onSubmit={handleSubmit}>
@@ -47,8 +48,8 @@ const CustomerForm = (props) => {
       </div>
       <div>
         <button type="submit" disabled={pristine || submitting}>Submit</button>
-        <button type="button" disabled={pristine || submitting} onClick={reset}>Clear Values</button>
-        <button type="button" disabled={submitting} onClick={deleteCustomer}>Delete</button>
+        <button type="button" disabled={submitting} onClick={cleanFields}>Clear Values</button>
+        <button type="button" disabled={submitting || !selectedCustomerId} onClick={deleteCustomer}>Delete</button>
       </div>
     </form>
   )

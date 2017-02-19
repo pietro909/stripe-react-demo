@@ -21,10 +21,6 @@ const normalizeData = customer => [
 	encode('metadata[lastName]', customer.lastName)
 ].join("&")
 
-/*
-	encodeURIComponent(JSON.stringify())
-*/
-
 export const request = (method, url, body) => {
   if (!API_KEY) {
     return Promise.reject('No API key found! check src/API.js and the README for more information.')
