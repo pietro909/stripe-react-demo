@@ -27,7 +27,7 @@ class AsideToolbar extends Component {
 		handleSubmit: PropTypes.func.isRequired,
 		deleteCustomer: PropTypes.func.isRequired,
 		unselectCustomer: PropTypes.func.isRequired,
-		selectedCustomerId: PropTypes.string.isRequired,
+		selectedCustomerId: PropTypes.string,
   }
  
   render() {
@@ -40,7 +40,7 @@ class AsideToolbar extends Component {
     return (
       <aside className="col-sm-4">
         <CustomerForm
-					selectedCustomerId={selectedCustomerId}
+					selectedCustomerId={selectedCustomerId} 
 					cleanFields={unselectCustomer}
 					onSubmit={handleSubmit}
 					deleteCustomer={deleteCustomer}
