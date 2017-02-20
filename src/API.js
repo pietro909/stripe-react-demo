@@ -6,8 +6,8 @@ const API_KEY = null
 const BASE_URL = 'https://api.stripe.com/v1/customers'
 
 const headers = {
-	"Authorization":"Bearer sk_test_rq2jmIfhZPVWQPqZa6oVETa6",
-	"Content-Type": "application/x-www-form-urlencoded"
+	'Authorization':`Bearer ${API_KEY}`,
+	'Content-Type': 'application/x-www-form-urlencoded'
 }
 
 const encode = (key, value) =>
@@ -19,7 +19,7 @@ const normalizeData = customer => [
 	encode('email', customer.email),
 	encode('metadata[firstName]', customer.firstName),
 	encode('metadata[lastName]', customer.lastName)
-].join("&")
+].join('&')
 
 export const request = (method, url, body) => {
   if (!API_KEY) {

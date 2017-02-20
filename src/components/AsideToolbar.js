@@ -1,9 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
-import { initialize } from 'redux-form'
 
-import { createCustomer, updateCustomer } from '../actions'
 import CustomerForm from './CustomerForm'
 
 const mapStateToProps = (state, ownProps) => {

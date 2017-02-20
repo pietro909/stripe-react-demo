@@ -1,5 +1,6 @@
 import {
 	LIST_UPDATED,
+	UPDATE_LIST,
   CREATE_CUSTOMER,
   DELETE_CUSTOMER,
   ERROR,
@@ -7,28 +8,8 @@ import {
   SELECT_CUSTOMER,
   UNSELECT_CUSTOMER,
   UPDATE_CUSTOMER, 
-} from '../constants/ActionTypes' 
+} from '../constants' 
 import * as Utils from './utils' 
-
-/*
- * show a list of customers
- * create button always active
- *  open blank form when pressed
- *    show cancel and submit
- *      cancel closes the form
- *      submit send CREATE_CUSTOMER with customer's data
- * update button active if list nonEmpty
- *  open form filled with customer's data when pressed
- *    show cancel and submit
- *      cancel closes the form
- *      submit send UPDATE_CUSTOMER with customer's data
- * delete button active if list nonEmpty
- *  send DELETE_CUSTOMER action with customer's id
- *
- * HTTP actions:
- *  OK with message
- *  ERROR with message
- */ 
 
 const initialState = {
   customers: [],
@@ -51,13 +32,13 @@ export default function customers(state = initialState, action) {
 
     case CREATE_CUSTOMER:
       return Object.assign({}, state, {
-        message: Utils.makeInfo(`Creating new customer...`)
+        message: Utils.makeWarning(`Creating new customer...`)
       })
 
     case UPDATE_CUSTOMER: {
       const id = action.id
       return Object.assign({}, state, {
-        message: Utils.makeInfo(`Updating customer ${id}...`)
+        message: Utils.makeWarning(`Updating customer ${id}...`)
       })
     }
 
@@ -68,20 +49,28 @@ export default function customers(state = initialState, action) {
       })
     }
 
+		case UPDATE_LIST:
+			return Object.assign({}, state, {
+				message: Utils.makeWarning('Fetching customers...')
+			})
+
 		case LIST_UPDATED:
 			const customers = action.data.map(item => ({
-				balance: item.account_balance,
+				balance: item.account_balance/1000,
 				description: item.description,
 				email: item.email,
 				firstName: item.metadata.firstName,
 				id: item.id,
 				lastName: item.metadata.lastName,
 			}))
-			return Object.assign({}, state, { customers })
+			return Object.assign({}, state, {
+        message: Utils.makeInfo(`Read ${customers.length} customers.`),
+				customers,
+			})
 
     case OK:
       return Object.assign({}, state, {
-        message: Utils.makeError(action.message)
+        message: Utils.makeInfo(action.message)
       })
 
     case ERROR:

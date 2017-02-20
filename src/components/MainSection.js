@@ -17,7 +17,7 @@ export default class MainSection extends Component {
 			
     return (
       <section className="col-sm-8 main">
-        <ul className="server-list">
+        <ul>
           {customers.map(customer =>
             <Customer
               key={customer.id}

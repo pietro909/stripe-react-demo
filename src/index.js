@@ -7,9 +7,9 @@ import thunkMiddleware from 'redux-thunk'
 import createLogger from 'redux-logger'
 
 import customers from './reducers/customers'
-import App from './containers/App'
+import App from './App'
 import listUpdater from './middlewares/listUpdater'
-import {OK} from './constants/ActionTypes'
+import { OK } from './constants'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './styles.css'
@@ -22,7 +22,8 @@ const reducers = combineReducers({
 		customer: (state, action) => {
 			switch(action.type) {
 				case OK:
-					return undefined;       // <--- blow away form data
+					// reset form data.
+					return undefined;
 				default:
 					return state;
 			}

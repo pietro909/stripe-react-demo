@@ -20,7 +20,7 @@ export class Customer extends Component {
   }
 
   render() {
-    const { id, name, lastName, email, description, balance, clickHandler } = this.props
+    const { name, lastName, email, description, balance, clickHandler } = this.props
 
     return (
       <li className="customer" onClick={clickHandler}>

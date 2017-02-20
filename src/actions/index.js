@@ -1,5 +1,5 @@
-import * as types from '../constants/ActionTypes'
-import * as API from '../constants/API'
+import * as types from '../constants'
+import * as API from '../API'
 
 export const selectCustomer = (id) => ({
 	type: types.SELECT_CUSTOMER,
@@ -10,6 +10,8 @@ export const openEditor = (id) => ({
 	type: types.OPEN_EDITOR,
 	id
 })
+
+export const updateList = () => ({ type: types.UPDATE_LIST })
 
 export const listUpdated = data => ({
 	type: types.LIST_UPDATED,
@@ -63,6 +65,4 @@ export const deleteCustomer = id => dispatch => {
 		.then(response => dispatch(resultOk('Customer deleted')))
 		.catch(reason => dispatch(resultError(reason)))
 }
-
-export const updateList = () => ({ type: types.UPDATE_LIST })
 

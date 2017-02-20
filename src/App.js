@@ -1,10 +1,10 @@
 import React, { PropTypes } from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import Header from '../components/Header'
-import AsideToolbar from '../components/AsideToolbar'
-import MainSection from '../components/MainSection'
-import * as Actions from '../actions'
+import Header from './components/Header'
+import AsideToolbar from './components/AsideToolbar'
+import MainSection from './components/MainSection'
+import * as Actions from './actions'
 
 const App = ({customers, actions, message, selectedCustomer}) => {
   const msgText = message && message.message

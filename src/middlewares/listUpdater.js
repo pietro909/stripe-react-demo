@@ -1,19 +1,17 @@
-import { reset, initialize, autofill } from 'redux-form'
+import { reset, initialize } from 'redux-form'
 
-import * as API from '../constants/API'
+import * as API from '../API'
 import {
-  CREATE_CUSTOMER,
-  DELETE_CUSTOMER,
-  UPDATE_CUSTOMER, 
-  UPDATE_LIST,
 	SELECT_CUSTOMER,
 	UNSELECT_CUSTOMER,
-} from '../constants/ActionTypes' 
-import { updateList, resultOk, resultError, listUpdated } from '../actions'
+  UPDATE_LIST,
+} from '../constants' 
+import { resultError, listUpdated } from '../actions'
 import * as selectors from '../selectors'
 
 const listUpdater = ({ dispatch, getState }) => next => action => {
   const result = next(action)
+
 	switch(action.type) {
 
 		case UPDATE_LIST:
@@ -38,6 +36,9 @@ const listUpdater = ({ dispatch, getState }) => next => action => {
 
 		case UNSELECT_CUSTOMER:
 			dispatch(initialize('customer'))
+
+		// no default
+
 	}
   return result
 }
