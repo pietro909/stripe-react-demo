@@ -23,9 +23,7 @@ const listUpdater = ({ dispatch, getState }) => next => action => {
           }
           throw new Error('Network error.')
         })
-        .then(response => {
-          dispatch(listUpdated(response.data))
-        })
+        .then(response => dispatch(listUpdated(response.data)))
         .catch(reason => dispatch(resultError(reason)))
       break
 

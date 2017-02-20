@@ -13,6 +13,10 @@ This project template was built with [Create React App](https://github.com/faceb
 
 Using [Stripe API](https://stripe.com/docs/api#list_customers) for customers' management.
 
+## Before running
+
+Make sure you get you own API key from Stripe and put it in `src/API.js` 
+
 ## Available Scripts
 
 In the project directory, you can run:
