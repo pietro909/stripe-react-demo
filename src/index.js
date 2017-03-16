@@ -4,7 +4,7 @@ import { applyMiddleware, combineReducers, createStore } from 'redux';
 import { reducer as formReducer } from 'redux-form'
 import { render } from 'react-dom'
 import thunkMiddleware from 'redux-thunk'
-import createLogger from 'redux-logger'
+// import createLogger from 'redux-logger'
 
 import customers from './reducers/customers'
 import App from './App'
@@ -14,8 +14,9 @@ import { OK } from './constants'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './styles.css'
 
-const loggerMiddleware = createLogger()
+// const loggerMiddleware = createLogger()
 
+/*
 const reducers = combineReducers({
 	customers,
 	form: formReducer.plugin({
@@ -39,11 +40,10 @@ const store = createStore(
 		listUpdater,
   )
 );
+*/
 
 render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
+  <App />,
   document.getElementById('root')
 )
 
