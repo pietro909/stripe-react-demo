@@ -2,24 +2,25 @@ port module ElmApp exposing (main)
 
 import Html exposing (Html, div, text)
 
+import Api
+import Models exposing (..)
+import Messages exposing (..)
+
 port customers : List String -> Cmd msg
 
 port addCustomer : (String -> msg) -> Sub msg
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-  addCustomer AddCustomer
+port updateList : (() -> msg) -> Sub msg
 
 type alias Model =
   { customers : List String }
 
+initialModel : Model
+initialModel =
+  { customers = [] }
+
 init : String -> (Model, Cmd Msg)
 init flags =
-  ( Model [], Cmd.none )
-
-type Msg
-  = Customers (List String)
-  | AddCustomer String
+  ( initialModel, Cmd.none )
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -32,14 +33,27 @@ update msg model =
         ( newModel, cmd ) 
     AddCustomer name ->
       let
-        newModel = { model | customers = model.customers ++ [ name ] }
-        cmd = customers newModel.customers
+        --newModel = { model | customers = model.customers ++ [ name ] }
+        cmd = Api.create (Customer 10 "hey" "lil_p83@hotmail.com" name "" name)
       in
-        ( newModel, cmd ) 
+        ( model, cmd )
+    UpdateList ->
+      let cmd = Cmd.none
+      in
+        ( model, cmd)
+    CustomerCreated id ->
+      ( model, Cmd.none )
 
 view : Model -> Html Msg
 view model =
   div [] [ text "Done" ]
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.batch
+    [ addCustomer AddCustomer
+    , updateList (\_ -> UpdateList)
+    ]
 
 main : Program String Model Msg
 main =
@@ -47,5 +61,5 @@ main =
     { init = init
     , view = view
     , update = update
-    , subscriptions = (\_ -> addCustomer AddCustomer)
+    , subscriptions = subscriptions
     }

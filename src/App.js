@@ -46,21 +46,22 @@ export function appWithElm(WrappedComponent) { //, data) {
         console.log(app)
         Object.keys(app.ports).forEach(portId => {
           const port = app.ports[portId]
-          console.log(port)
           if (port.subscribe) {
-            port.subscribe(data => this.setState({
+            console.log(`${portId} OUT`)
+            port.subscribe(data => this.setState((prevState, props) => ({
               incoming: {
                 ...this.state.incoming,
                 [portId]: data
               }
-            }))
+            })))
           } else if (port.send) {
-            this.setState({
+            console.log(`${portId} IN`)
+            this.setState((prevState, props) => ({
               outgoing: {
                 ...this.state.outgoing,
                 [portId]: port.send
               }
-            })
+            }))
           }
         })
       })
@@ -89,16 +90,18 @@ class TheApp extends Component {
   }
 
   render() {
-    const outgoing = this.props.outgoing
+    const { addCustomer } = this.props.outgoing
+    const { customers } = this.props.incoming
+    const next = (customers && customers.length+1) || 0
     return (
       <article>
         <Header/>
         <div className="row">
           <MainSection
-            customers={this.props.incoming.customers || []}
+            customers={customers || []}
             actions={{}}
            />
-          <button onClick={() => outgoing.addCustomer('Vafffa')}>Click me</button>
+          <button onClick={() => addCustomer(`customer #${next}`)}>Click me</button>
         </div>
       </article>
     )

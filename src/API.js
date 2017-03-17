@@ -1,7 +1,7 @@
 /*
  * IMPORTANT! Insert here your API key
  */
-const API_KEY = null
+const API_KEY = ''
 
 const BASE_URL = 'https://api.stripe.com/v1/customers'
 

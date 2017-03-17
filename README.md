@@ -8,7 +8,6 @@ Additional libraries:
 * [Redux](http://redux.js.org/) for state management
 * [Bootstrap](http://getbootstrap.com/) as UI framework
 
-
 This project template was built with [Create React App](https://github.com/facebookincubator/create-react-app).A
 
 Using [Stripe API](https://stripe.com/docs/api#list_customers) for customers' management.
