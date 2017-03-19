@@ -6,13 +6,13 @@ import Api
 import Models exposing (..)
 import Messages exposing (..)
 
-port customers : List String -> Cmd msg
+port customers : List Customer -> Cmd msg
 
 port addCustomer : (String -> msg) -> Sub msg
 port updateList : (() -> msg) -> Sub msg
 
 type alias Model =
-  { customers : List String }
+  { customers : List Customer }
 
 initialModel : Model
 initialModel =
@@ -25,7 +25,9 @@ init flags =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
-    Customers list ->
+    Customers (Err e) ->
+      (model, Cmd.none)
+    Customers (Ok list) ->
       let
         newModel = { model | customers = list }
         cmd = customers list
@@ -38,7 +40,7 @@ update msg model =
       in
         ( model, cmd )
     UpdateList ->
-      let cmd = Cmd.none
+      let cmd = Api.readAll
       in
         ( model, cmd)
     CustomerCreated id ->

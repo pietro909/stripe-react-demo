@@ -1,7 +1,7 @@
 module Models exposing (..)
 
 type alias Customer =
-  { balance : Int
+  { balance : Float
   , description : String
   , email : String
   , firstName : String
