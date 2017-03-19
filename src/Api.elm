@@ -2,8 +2,8 @@ module Api exposing (..)
 
 import Http exposing (..)
 import Json.Encode
-import Json.Decode exposing (Decoder, decodeString, int, float, list, string)
-import Json.Decode.Pipeline exposing (decode, required, requiredAt, optional)
+import Json.Decode exposing (Decoder, decodeValue, int, float, list, string)
+import Json.Decode.Pipeline exposing (decode, required, requiredAt, optional, optionalAt)
 import Task
 
 import Models exposing (Customer)
@@ -53,15 +53,21 @@ normalizeData customer =
     , encodeParam "metadata[lastName]" customer.lastName
     ]
 
+customersDecoder : Decoder (List Customer)
+customersDecoder =
+  Json.Decode.at [ "data" ]
+    (list customerDecoder)
+  --§decodeValue (list customerDecoder) 
+
 customerDecoder : Decoder Customer
 customerDecoder =
   decode Customer
-    |> required "balance" float
+    |> required "account_balance" float
     |> optional "description" string ""
-    |> required "email" string
+    |> optional "email" string ""
+    |> optionalAt [ "metadata", "firstName" ] string ""
     |> required "id" string
-    |> requiredAt [ "metadata", "firstName" ] string
-    |> requiredAt [ "metadata", "lastName" ] string
+    |> optionalAt [ "metadata", "lastName" ] string ""
 
 create : Customer -> Cmd Msg
 create customer =
@@ -75,8 +81,8 @@ create customer =
 
 readAll : Cmd Msg
 readAll =
-  list customerDecoder
-    |> makeRequest "post" baseUrl Http.emptyBody --customerDecoder
+  customersDecoder
+    |> makeRequest "get" baseUrl Http.emptyBody --customerDecoder
     |> Http.send Customers
 
 

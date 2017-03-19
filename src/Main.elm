@@ -12,11 +12,13 @@ port addCustomer : (String -> msg) -> Sub msg
 port updateList : (() -> msg) -> Sub msg
 
 type alias Model =
-  { customers : List Customer }
+  { customers : List Customer
+  , error: String
+  }
 
 initialModel : Model
 initialModel =
-  { customers = [] }
+  { customers = [], error = ""}
 
 init : String -> (Model, Cmd Msg)
 init flags =
@@ -26,10 +28,13 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     Customers (Err e) ->
-      (model, Cmd.none)
+      let
+        newModel = { model | error = Debug.log "e" (toString e) }
+      in
+        (newModel, Cmd.none)
     Customers (Ok list) ->
       let
-        newModel = { model | customers = list }
+        newModel = { model | customers = Debug.log "customers" list }
         cmd = customers list
       in
         ( newModel, cmd ) 
@@ -44,7 +49,7 @@ update msg model =
       in
         ( model, cmd)
     CustomerCreated id ->
-      ( model, Cmd.none )
+      ( model, Api.readAll )
 
 view : Model -> Html Msg
 view model =

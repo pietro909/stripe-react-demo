@@ -19,9 +19,6 @@ export default class MainSection extends Component {
       <section className="col-sm-8 main">
         <ul>
           {customers.map(customer =>
-            <p key={customer}>customer</p>
-
-            /*
             <Customer
               key={customer.id}
               id={customer.id}
@@ -32,7 +29,6 @@ export default class MainSection extends Component {
               balance={customer.balance}
               onClick={actions.selectCustomer}
             />
-            */
           )}
         </ul>
       </section>

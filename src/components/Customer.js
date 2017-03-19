@@ -2,21 +2,17 @@ import React, { Component, PropTypes } from 'react'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	clickHandler: () => ownProps.onClick(ownProps.id)
-})
-
-export class Customer extends Component {
+export default class Customer extends Component {
 
   static propTypes = {
     balance: PropTypes.number.isRequired,
-    clickHandler: PropTypes.func.isRequired,
+    clickHandler: PropTypes.func,
     description: PropTypes.string.isRequired, 
     email: PropTypes.string.isRequired, 
     id: PropTypes.string.isRequired,
     lastName: PropTypes.string.isRequired, 
     name: PropTypes.string.isRequired, 
-    onClick: PropTypes.func.isRequired,
+    onClick: PropTypes.func,
   }
 
   render() {
@@ -33,7 +29,3 @@ export class Customer extends Component {
     )
   }
 }
-
-export default compose(
-	connect(mapDispatchToProps),
-)(Customer)

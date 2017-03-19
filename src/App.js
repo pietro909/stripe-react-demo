@@ -48,12 +48,14 @@ export function appWithElm(WrappedComponent) { //, data) {
           const port = app.ports[portId]
           if (port.subscribe) {
             console.log(`${portId} OUT`)
-            port.subscribe(data => this.setState((prevState, props) => ({
+            port.subscribe(data => this.setState((prevState, props) => {
+              console.log(data)
+              return{
               incoming: {
                 ...this.state.incoming,
                 [portId]: data
               }
-            })))
+            }}))
           } else if (port.send) {
             console.log(`${portId} IN`)
             this.setState((prevState, props) => ({
@@ -90,7 +92,7 @@ class TheApp extends Component {
   }
 
   render() {
-    const { addCustomer } = this.props.outgoing
+    const { addCustomer, updateList } = this.props.outgoing
     const { customers } = this.props.incoming
     const next = (customers && customers.length+1) || 0
     return (
@@ -101,6 +103,7 @@ class TheApp extends Component {
             customers={customers || []}
             actions={{}}
            />
+          <button onClick={() => updateList(null)}>update list</button>
           <button onClick={() => addCustomer(`customer #${next}`)}>Click me</button>
         </div>
       </article>
