@@ -1,4 +1,4 @@
-module Api exposing (..)
+module Api exposing (API, getAPI)
 
 import Http exposing (..)
 import Json.Encode
@@ -9,39 +9,27 @@ import Task
 import Models exposing (Customer)
 import Messages exposing (..)
 
-{--
-errorDecoder : Json.Decode.Decoder String
-errorDecoder =
-    Json.Decode.at [ "error" ]
-       ( Json.Decode.string )
+type alias API =
+  { create : Customer -> Cmd Msg
+  , update : Customer -> Cmd Msg
+  , delete : Customer -> Cmd Msg
+  , list : Cmd Msg
+  }
 
-errorExtractor : Error -> String
-errorExtractor error =
-  case error of
-    BadStatus response ->
-      Result.withDefault "Unknown error" (decodeString errorDecoder response.body)
-    _ -> "We apologize, something went wrong."
---}
+getAPI : String -> API
+getAPI token =
+  { create = create token
+  , update = update token
+  , delete = delete token
+  , list = readAll token
+  }
 
-api_key = ""
 baseUrl = "https://api.stripe.com/v1/customers"
 urlWithId id = baseUrl ++ "/" ++ id
 
 encodeParam : String -> String -> String
 encodeParam key value =
   (encodeUri key) ++ "=" ++ (encodeUri value)
-
-makeRequest : String -> String -> Body -> Decoder a -> Request a
-makeRequest method url body resultDecoder =
-  request
-    { method = method
-    , headers = [ header "Authorization" ("Bearer " ++ api_key) ]
-    , url = url
-    , body = body
-    , expect = expectJson resultDecoder
-    , timeout = Nothing
-    , withCredentials = False
-    }
 
 normalizeData : Customer -> String
 normalizeData customer =
@@ -53,11 +41,23 @@ normalizeData customer =
     , encodeParam "metadata[lastName]" customer.lastName
     ]
 
+makeRequest : String -> String -> String -> Body -> Decoder a -> Request a
+makeRequest token method url body resultDecoder =
+  request
+    { method = method
+    , headers = [ header "Authorization" ("Bearer " ++ token) ]
+    , url = url
+    , body = body
+    , expect = expectJson resultDecoder
+    , timeout = Nothing
+    , withCredentials = False
+    }
+
+
 customersDecoder : Decoder (List Customer)
 customersDecoder =
   Json.Decode.at [ "data" ]
     (list customerDecoder)
-  --§decodeValue (list customerDecoder) 
 
 customerDecoder : Decoder Customer
 customerDecoder =
@@ -69,20 +69,35 @@ customerDecoder =
     |> required "id" string
     |> optionalAt [ "metadata", "lastName" ] string ""
 
-create : Customer -> Cmd Msg
-create customer =
+create : String -> Customer -> Cmd Msg
+create token customer =
   let
     body = customer
       |> normalizeData
       |> Http.stringBody "application/x-www-form-urlencoded"
-    post = makeRequest "post" baseUrl body customerDecoder
+    post = makeRequest token "post" baseUrl body customerDecoder
   in
     Http.send CustomerCreated post
 
-readAll : Cmd Msg
-readAll =
-  customersDecoder
-    |> makeRequest "get" baseUrl Http.emptyBody --customerDecoder
-    |> Http.send Customers
+update : String -> Customer -> Cmd Msg
+update token customer =
+  let
+    body = customer
+      |> normalizeData
+      |> Http.stringBody "application/x-www-form-urlencoded"
+    post = makeRequest token "post" (urlWithId customer.id) body customerDecoder
+  in
+    Http.send CustomerUpdated post
 
+delete : String -> Customer -> Cmd Msg
+delete token customer =
+  Json.Decode.at [ "id" ] string
+    |> makeRequest token "delete" (urlWithId customer.id) Http.emptyBody
+    |> Http.send CustomerDeleted
+
+readAll : String -> Cmd Msg
+readAll token =
+  customersDecoder
+    |> makeRequest token "get" baseUrl Http.emptyBody
+    |> Http.send Customers
 

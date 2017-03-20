@@ -5,7 +5,7 @@ import Customer from './Customer'
 export default class MainSection extends Component {
   static propTypes = {
     customers: PropTypes.array.isRequired,
-    actions: PropTypes.object.isRequired
+    selectCustomer: PropTypes.func.isRequired,
   }
 
 	componentDidMount() {
@@ -13,7 +13,7 @@ export default class MainSection extends Component {
 	}
 
   render() {
-    const { customers, actions } = this.props
+    const { customers, selectCustomer } = this.props
 			
     return (
       <section className="col-sm-8 main">
@@ -27,7 +27,7 @@ export default class MainSection extends Component {
               email={customer.email}
               description={customer.description}
               balance={customer.balance}
-              onClick={actions.selectCustomer}
+              onClick={() => selectCustomer(customer.id)}
             />
           )}
         </ul>

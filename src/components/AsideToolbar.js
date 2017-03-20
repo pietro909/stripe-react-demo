@@ -1,58 +1,32 @@
 import React, { Component, PropTypes } from 'react'
-import { compose } from 'redux'
-import { connect } from 'react-redux'
+//import CustomerForm from './CustomerForm'
 
-import CustomerForm from './CustomerForm'
-
-const mapStateToProps = (state, ownProps) => {
-	const id = state.customers.selectedCustomer
-	const actions = ownProps.actions
-	return {	
-		selectedCustomerId: id,
-		deleteCustomer: () =>	actions.deleteCustomer(id),
-		unselectCustomer: () => actions.unselectCustomer(),
-		handleSubmit: values => {
-			if (id) {
-				ownProps.actions.updateCustomer(id, values)
-			} else {
-				ownProps.actions.createCustomer(values)
-			}
-		},
-	}
-}
-
-class AsideToolbar extends Component {
+export default class AsideToolbar extends Component {
 
   static propTypes = {
-		handleSubmit: PropTypes.func.isRequired,
 		deleteCustomer: PropTypes.func.isRequired,
-		unselectCustomer: PropTypes.func.isRequired,
-		selectedCustomerId: PropTypes.string,
+		selectedCustomer: PropTypes.object.isRequired,
   }
  
   render() {
 		const {
 			deleteCustomer,
-			handleSubmit,
-			unselectCustomer,
-			selectedCustomerId,
+			selectedCustomer,
 		} = this.props
     return (
       <aside className="col-sm-4">
+        <p>{selectedCustomer.id}</p>
+      {/*
+
         <CustomerForm
-					selectedCustomerId={selectedCustomerId} 
+					selectedCustomer={selectedCustomer} 
 					cleanFields={unselectCustomer}
 					onSubmit={handleSubmit}
 					deleteCustomer={deleteCustomer}
 				/>
+      */}
      </aside>
     )
   }
 }
-
-export default compose(
-	connect(mapStateToProps),
-)(AsideToolbar)
-
-
 

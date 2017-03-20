@@ -6,6 +6,11 @@ import Models exposing (..)
 
 type Msg
   = Customers (Result Http.Error (List Customer))
-  | AddCustomer String
-  | UpdateList
+  | CreateCustomer Customer
   | CustomerCreated (Result Http.Error Customer)
+  | CustomerDeleted (Result Http.Error String)
+  | CustomerUpdated (Result Http.Error Customer)
+  | DeleteCustomer Customer
+  | SelectCustomer String
+  | UpdateCustomer Customer
+  | UpdateList

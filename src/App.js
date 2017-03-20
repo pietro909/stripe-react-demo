@@ -7,7 +7,7 @@ import AsideToolbar from './components/AsideToolbar'
 import MainSection from './components/MainSection'
 import * as Actions from './actions'
 
-const bootstrapElm = (elmApp) =>
+const bootstrapElm = (elmApp, flags) =>
   new Promise((resolve, reject) => {
     const node = document.createElement('div')
     let app = null
@@ -22,10 +22,10 @@ const bootstrapElm = (elmApp) =>
     });
     const config = { attributes: true, childList: true, characterData: true };
     observer.observe(node, config);
-    app = elmApp.embed(node, ' ')
+    app = elmApp.embed(node, flags)
   })
 
-export function appWithElm(WrappedComponent) { //, data) {
+export function appWithElm(WrappedComponent, flags) { //, data) {
   return class extends Component {
     constructor(props) {
       super(props)
@@ -38,18 +38,15 @@ export function appWithElm(WrappedComponent) { //, data) {
         // ...dataIds
       }
       const elmApp = Elm.ElmApp
-      bootstrapElm(elmApp).then(app => {
-        this.setState((prevState, props) => ({
-          ports: app.ports,
-          ready: true
-        }))
-        console.log(app)
+      bootstrapElm(elmApp, flags).then(app => {
         Object.keys(app.ports).forEach(portId => {
           const port = app.ports[portId]
           if (port.subscribe) {
             console.log(`${portId} OUT`)
             port.subscribe(data => this.setState((prevState, props) => {
+              console.group(`receive ${portId}`)
               console.log(data)
+              console.groupEnd()
               return{
               incoming: {
                 ...this.state.incoming,
@@ -61,11 +58,20 @@ export function appWithElm(WrappedComponent) { //, data) {
             this.setState((prevState, props) => ({
               outgoing: {
                 ...this.state.outgoing,
-                [portId]: port.send
+                [portId]: (...args) => {
+                  console.group(`call ${portId}`)
+                  args.forEach(a => console.log(a))
+                  console.groupEnd()
+                  port.send(...args)
+                }
               }
             }))
           }
         })
+        this.setState((prevState, props) => ({
+          ports: app.ports,
+          ready: true
+        }))
       })
     }
 
@@ -92,24 +98,38 @@ class TheApp extends Component {
   }
 
   render() {
-    const { addCustomer, updateList } = this.props.outgoing
-    const { customers } = this.props.incoming
+    const {
+      addCustomer,
+      deleteCustomer,
+      selectCustomer,
+      updateCustomer,
+      updateList,
+    } = this.props.outgoing
+    const { 
+      customerInTheEditor,
+      customers,
+    } = this.props.incoming
     const next = (customers && customers.length+1) || 0
     return (
       <article>
         <Header/>
         <div className="row">
+          <AsideToolbar
+            deleteCustomer={deleteCustomer}
+            selectedCustomer={customerInTheEditor || {}}
+          />
           <MainSection
             customers={customers || []}
-            actions={{}}
+            selectCustomer={selectCustomer}
            />
           <button onClick={() => updateList(null)}>update list</button>
-          <button onClick={() => addCustomer(`customer #${next}`)}>Click me</button>
         </div>
       </article>
     )
   }
 }
+
+console.log(process.env)
  
-const App = appWithElm(TheApp)
+const App = appWithElm(TheApp, { apiKey: process.env.REACT_APP_API_KEY })
 export default App 

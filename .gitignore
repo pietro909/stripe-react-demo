@@ -3,4 +3,5 @@ node_modules/
 elm-stuff/
 *.log
 *.lock
+*.env
 ElmApp.js

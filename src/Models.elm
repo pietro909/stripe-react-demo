@@ -9,3 +9,6 @@ type alias Customer =
   , lastName : String
   }
 
+emptyCustomer =
+  Customer 0.0 "" "" "" "" ""
+

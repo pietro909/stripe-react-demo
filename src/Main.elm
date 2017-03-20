@@ -1,55 +1,104 @@
 port module ElmApp exposing (main)
 
 import Html exposing (Html, div, text)
+import List.Extra as Lx
 
-import Api
+import Api exposing (..)
 import Models exposing (..)
 import Messages exposing (..)
 
+port errors : List String -> Cmd msg
 port customers : List Customer -> Cmd msg
+port customerInTheEditor : Customer -> Cmd msg
 
-port addCustomer : (String -> msg) -> Sub msg
+port createCustomer : (Customer -> msg) -> Sub msg
+port updateCustomer : (Customer -> msg) -> Sub msg
+port deleteCustomer : (Customer -> msg) -> Sub msg
+port selectCustomer : (String -> msg) -> Sub msg
 port updateList : (() -> msg) -> Sub msg
 
 type alias Model =
   { customers : List Customer
-  , error: String
+  , customerInTheEditor : Customer
+  , errors: List String
+  , api: API
   }
 
-initialModel : Model
-initialModel =
-  { customers = [], error = ""}
+type alias Flags =
+  { apiKey : String }
 
-init : String -> (Model, Cmd Msg)
+initialModel : Flags -> Model
+initialModel flags =
+  { customers = []
+  , customerInTheEditor = emptyCustomer 
+  , errors = []
+  , api = getAPI flags.apiKey
+  }
+
+init : Flags -> (Model, Cmd Msg)
 init flags =
-  ( initialModel, Cmd.none )
+  ( initialModel flags, Cmd.none )
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     Customers (Err e) ->
       let
-        newModel = { model | error = Debug.log "e" (toString e) }
+        newModel = { model | errors = (toString e)::model.errors }
       in
         (newModel, Cmd.none)
     Customers (Ok list) ->
       let
-        newModel = { model | customers = Debug.log "customers" list }
+        newModel = { model | customers = list }
         cmd = customers list
       in
         ( newModel, cmd ) 
-    AddCustomer name ->
+    CreateCustomer customer ->
       let
-        --newModel = { model | customers = model.customers ++ [ name ] }
-        cmd = Api.create (Customer 10 "hey" "lil_p83@hotmail.com" name "" name)
+        cmd = model.api.create customer
       in
         ( model, cmd )
+    UpdateCustomer customer ->
+      let
+        cmd = model.api.update customer
+      in
+        ( model, cmd )
+    DeleteCustomer customer ->
+      let
+        cmd = model.api.delete customer
+      in
+        ( model, cmd )
+    SelectCustomer id ->
+      let
+        maybeCustomer = Lx.find (\c -> c.id == id) model.customers
+        (newModel, cmd) =
+          case maybeCustomer of
+            Nothing ->
+              let
+                error = "Can't find id " ++ id
+                newModel = { model | errors = error :: model.errors }
+                cmd = Cmd.batch
+                  [ customerInTheEditor emptyCustomer
+                  , errors newModel.errors
+                  ]
+              in
+                ( newModel, cmd )
+            Just customer ->
+              ( model --{ model | selectedCustomer = customer }
+              , customerInTheEditor customer
+              )
+      in
+        (newModel, cmd)
     UpdateList ->
-      let cmd = Api.readAll
+      let cmd = model.api.list
       in
         ( model, cmd)
     CustomerCreated id ->
-      ( model, Api.readAll )
+      ( model, model.api.list )
+    CustomerDeleted id ->
+      ( model, model.api.list )
+    CustomerUpdated customer ->
+      ( model, model.api.list )
 
 view : Model -> Html Msg
 view model =
@@ -58,11 +107,14 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ addCustomer AddCustomer
+    [ createCustomer CreateCustomer
+    , deleteCustomer DeleteCustomer 
+    , updateCustomer UpdateCustomer 
+    , selectCustomer SelectCustomer
     , updateList (\_ -> UpdateList)
     ]
 
-main : Program String Model Msg
+main : Program Flags Model Msg
 main =
   Html.programWithFlags
     { init = init

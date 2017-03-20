@@ -6,7 +6,6 @@ export default class Customer extends Component {
 
   static propTypes = {
     balance: PropTypes.number.isRequired,
-    clickHandler: PropTypes.func,
     description: PropTypes.string.isRequired, 
     email: PropTypes.string.isRequired, 
     id: PropTypes.string.isRequired,
@@ -16,10 +15,18 @@ export default class Customer extends Component {
   }
 
   render() {
-    const { name, lastName, email, description, balance, clickHandler } = this.props
+    const { 
+      name,
+      lastName,
+      email,
+      description,
+      balance,
+      clickHandler,
+      onClick,
+    } = this.props
 
     return (
-      <li className="customer" onClick={clickHandler}>
+      <li className="customer" onClick={onClick}>
         <span>{name}</span>
         <span>{lastName}</span>
         <span>{balance}</span>
