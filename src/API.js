@@ -25,7 +25,7 @@ export const request = (method, url, body) => {
   if (!API_KEY) {
     return Promise.reject('No API key found! check src/API.js and the README for more information.')
   }
-	return fetch(url, { method, headers, body })
+  return fetch(url, { method, headers, body })
 }
 
 export const list = () => 
