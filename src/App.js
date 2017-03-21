@@ -104,12 +104,14 @@ class TheApp extends Component {
       selectCustomer,
       updateCustomer,
       updateList,
+      updateForm,
     } = this.props.outgoing
     const { 
       customerInTheEditor,
       customers,
+      formUpdated,
     } = this.props.incoming
-    const next = (customers && customers.length+1) || 0
+    const updateFormField = (name, value) => updateForm([name, value])
     return (
       <article>
         <Header/>
@@ -117,6 +119,8 @@ class TheApp extends Component {
           <AsideToolbar
             deleteCustomer={deleteCustomer}
             selectedCustomer={customerInTheEditor || {}}
+            unselectCustomer={() => selectCustomer('')}
+            updateForm={updateFormField}
           />
           <MainSection
             customers={customers || []}

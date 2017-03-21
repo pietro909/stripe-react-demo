@@ -1,47 +1,78 @@
-import React from 'react'
-import { Field, reduxForm } from 'redux-form'
+import React, { Component } from 'react'
+
+class Input extends Component {
+  
+  constructor(props) {
+    super(props)
+    this.state = {
+      attributes: {
+        id: props.name,
+        name: props.name,
+        placeholder: props.placeholder,
+        type: props.type || 'text',
+        value: props.value,
+        onChange: props.onChange,
+      }
+    }
+  }
+
+  render() {
+    return(
+      <input 
+        {...this.state.attributes}
+
+      />)
+  }
+}
 
 const CustomerForm = (props) => {
   const {
-		handleSubmit,
-		pristine,
-		submitting,
-		deleteCustomer,
 		cleanFields,
-		selectedCustomerId,
+		deleteCustomer,
+		model,
+    onSubmit,
+    onChange,
 	} = props
+  // pristine, submitting...
   return (
-    <form onSubmit={handleSubmit} className="row">
+    <form onSubmit={onSubmit} className="row">
       <div className="form-field col-sm-12">
-				<label>First Name</label>
-				<Field name="firstName" component="input" type="text" placeholder="First Name"/>
-      </div>
+        <label>First Name</label>
+        <Input
+          name="firstName"
+          value={model.firstName}
+          onChange={({ target }) => onChange('firstName', target.value)}
+          placeholder="First name"
+        />
+			</div>
+    {/*
       <div className="form-field col-sm-12">
 				<label>Last Name</label>
-				<Field name="lastName" component="input" type="text" placeholder="Last Name"/>
+				<input name="lastName" type="text" placeholder="Last Name"/>
       </div>
       <div className="form-field col-sm-12">
 				<label>Email</label>
-				<Field name="email" component="input" type="email" placeholder="Email"/>
+				<input name="email" type="email" placeholder="Email"/>
       </div>
       <div className="form-field col-sm-12">
 				<label>Description</label>
-				<Field name="description" component="input" type="text" placeholder="Description"/>
+				<input name="description" type="text" placeholder="Description"/>
       </div>
       <div className="form-field col-sm-12">
 				<label>Balance</label>
-				<Field name="balance" component="input" type="number" placeholder="Balance"/>
+				<input name="balance" type="number" placeholder="Balance"/>
       </div>
+      */}
       <div className="buttons col-sm-12">
-        <button type="submit" className="btn btn-default" disabled={pristine || submitting}>Submit</button>
-        <button type="button" className="btn btn-primary" disabled={submitting} onClick={cleanFields}>Clear Values</button>
-        <button type="button" className="btn btn-danger" disabled={submitting || !selectedCustomerId} onClick={deleteCustomer}>Delete</button>
+        <button type="onSubmit" className="btn btn-default"
+          onClick={onSubmit}>Submit</button>
+        <button type="button" className="btn btn-primary"
+          onClick={cleanFields}>Clear Values</button>
+        <button type="button" className="btn btn-danger"
+          onClick={deleteCustomer}>Delete</button>
       </div>
     </form>
   )
 }
 
-export default reduxForm({
-	form: 'customer'
-})(CustomerForm)
-
+export default CustomerForm

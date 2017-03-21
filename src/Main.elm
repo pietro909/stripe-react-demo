@@ -6,6 +6,7 @@ import List.Extra as Lx
 import Api exposing (..)
 import Models exposing (..)
 import Messages exposing (..)
+import Form
 
 port errors : List String -> Cmd msg
 port customers : List Customer -> Cmd msg
@@ -22,6 +23,7 @@ type alias Model =
   , customerInTheEditor : Customer
   , errors: List String
   , api: API
+  , form: Form.Model
   }
 
 type alias Flags =
@@ -33,6 +35,7 @@ initialModel flags =
   , customerInTheEditor = emptyCustomer 
   , errors = []
   , api = getAPI flags.apiKey
+  , form = Form.initialModel
   }
 
 init : Flags -> (Model, Cmd Msg)
@@ -99,6 +102,13 @@ update msg model =
       ( model, model.api.list )
     CustomerUpdated customer ->
       ( model, model.api.list )
+    FormMessage msg ->
+      let
+        (form, formCmd) = Form.update msg model.form
+        newModel = { model | form = form }
+        cmd = Cmd.map FormMessage formCmd
+      in
+        (newModel, cmd)
 
 view : Model -> Html Msg
 view model =
@@ -112,6 +122,7 @@ subscriptions model =
     , updateCustomer UpdateCustomer 
     , selectCustomer SelectCustomer
     , updateList (\_ -> UpdateList)
+    , Sub.map FormMessage (Form.subscriptions model.form)
     ]
 
 main : Program Flags Model Msg

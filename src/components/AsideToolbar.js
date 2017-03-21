@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react'
-//import CustomerForm from './CustomerForm'
+import CustomerForm from './CustomerForm'
 
 export default class AsideToolbar extends Component {
 
@@ -12,19 +12,20 @@ export default class AsideToolbar extends Component {
 		const {
 			deleteCustomer,
 			selectedCustomer,
+      unselectCustomer,
+      updateForm,
 		} = this.props
+    const handleSubmit = () => console.log(`submit!`)
     return (
       <aside className="col-sm-4">
         <p>{selectedCustomer.id}</p>
-      {/*
-
         <CustomerForm
-					selectedCustomer={selectedCustomer} 
 					cleanFields={unselectCustomer}
-					onSubmit={handleSubmit}
 					deleteCustomer={deleteCustomer}
+					model={selectedCustomer} 
+					onSubmit={handleSubmit}
+          onChange={updateForm}
 				/>
-      */}
      </aside>
     )
   }
