@@ -92,7 +92,7 @@ update msg model =
                     , form = Form.initialModel
                   }
                 cmd = Cmd.batch
-                  [ Cmd.map FormMessage (Form.formUpdated newModel.form)
+                  [ Cmd.map FormMessage (Form.formUpdated (Form.encodeModel newModel.form))
                   , errors newModel.errors
                   ]
               in

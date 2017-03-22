@@ -46,24 +46,25 @@ const CustomerForm = (props) => {
     onSubmit,
     onChange,
 	} = props
+  const { fields } = model
   // pristine, submitting...
   return (
     <form onSubmit={onSubmit} className="row">
       <div className="form-field col-sm-12">
         <label>First Name</label>
         <Input
-          name={model.firstName.name}
-          value={model.firstName.value}
-          onChange={({target}) => onChange(model.firstName.name, target.value)}
+          name={fields.firstName.name}
+          value={fields.firstName.value}
+          onChange={({target}) => onChange(fields.firstName.name, target.value)}
           placeholder="First name"
         />
 			</div>
       <div className="form-field col-sm-12">
         <label>Last Name</label>
         <Input
-          name={model.lastName.name}
-          value={model.lastName.value}
-          onChange={({target}) => onChange(model.lastName.name, target.value)}
+          name={fields.lastName.name}
+          value={fields.lastName.value}
+          onChange={({target}) => onChange(fields.lastName.name, target.value)}
           placeholder="Second name"
         />
 			</div>
@@ -73,27 +74,27 @@ const CustomerForm = (props) => {
           type="number"
           step="0.1"
           min="0"
-          name={model.balance.name}
-          value={model.balance.value}
-          onChange={({target}) => onChange(model.balance.name, target.value)}
+          name={fields.balance.name}
+          value={fields.balance.value}
+          onChange={({target}) => onChange(fields.balance.name, target.value)}
         />
 			</div>
       <div className="form-field col-sm-12">
         <label>Email</label>
         <Input
           type="email"
-          name={model.email.name}
-          value={model.email.value}
-          onChange={({target}) => onChange(model.email.name, target.value)}
+          name={fields.email.name}
+          value={fields.email.value}
+          onChange={({target}) => onChange(fields.email.name, target.value)}
           placeholder="your@e.mail"
         />
 			</div>
       <div className="form-field col-sm-12">
         <label>Description</label>
         <Input
-          name={model.description.name}
-          value={model.description.value}
-          onChange={({target}) => onChange(model.description.name, target.value)}
+          name={fields.description.name}
+          value={fields.description.value}
+          onChange={({target}) => onChange(fields.description.name, target.value)}
           placeholder="Description"
         />
 			</div>
