@@ -50,8 +50,8 @@ update msg model =
     Start config ->
       let
         newModel = { model | config = config }
-      in
-        (model, started True)
+      in 
+        (newModel, started True)
     Customers (Err e) ->
       let
         newModel = { model | errors = (toString e)::model.errors }
@@ -86,9 +86,13 @@ update msg model =
             Nothing ->
               let
                 error = "Can't find id " ++ id
-                newModel = { model | errors = error :: model.errors }
+                newModel =
+                  { model
+                    | errors = error :: model.errors
+                    , form = Form.initialModel
+                  }
                 cmd = Cmd.batch
-                  [ customerInTheEditor emptyCustomer
+                  [ Cmd.map FormMessage (Form.formUpdated newModel.form)
                   , errors newModel.errors
                   ]
               in

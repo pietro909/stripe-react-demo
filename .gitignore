@@ -5,3 +5,4 @@ elm-stuff/
 *.lock
 *.env
 ElmApp.js
+start.sh

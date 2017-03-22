@@ -67,25 +67,36 @@ const CustomerForm = (props) => {
           placeholder="Second name"
         />
 			</div>
-
-    {/*
       <div className="form-field col-sm-12">
-				<label>Last Name</label>
-				<input name="lastName" type="text" placeholder="Last Name"/>
-      </div>
+        <label>Balance</label>
+        <Input
+          type="number"
+          step="0.1"
+          min="0"
+          name={model.balance.name}
+          value={model.balance.value}
+          onChange={({target}) => onChange(model.balance.name, target.value)}
+        />
+			</div>
       <div className="form-field col-sm-12">
-				<label>Email</label>
-				<input name="email" type="email" placeholder="Email"/>
-      </div>
+        <label>Email</label>
+        <Input
+          type="email"
+          name={model.email.name}
+          value={model.email.value}
+          onChange={({target}) => onChange(model.email.name, target.value)}
+          placeholder="your@e.mail"
+        />
+			</div>
       <div className="form-field col-sm-12">
-				<label>Description</label>
-				<input name="description" type="text" placeholder="Description"/>
-      </div>
-      <div className="form-field col-sm-12">
-				<label>Balance</label>
-				<input name="balance" type="number" placeholder="Balance"/>
-      </div>
-      */}
+        <label>Description</label>
+        <Input
+          name={model.description.name}
+          value={model.description.value}
+          onChange={({target}) => onChange(model.description.name, target.value)}
+          placeholder="Description"
+        />
+			</div>
       <div className="buttons col-sm-12">
         <button type="onSubmit" className="btn btn-default"
           onClick={onSubmit}>Submit</button>

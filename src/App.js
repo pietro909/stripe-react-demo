@@ -48,7 +48,13 @@ class TheApp extends Component {
   }
 }
 
-const options = { debug: true }
-const App = appWithElm(options)(TheApp, { apiKey: process.env.REACT_APP_API_KEY })
+const options = { 
+  startMessage: {
+    apiKey: process.env.REACT_APP_API_KEY,
+  },
+  debug: true,
+}
+
+const App = appWithElm(options)(TheApp)
 
 export default App 
