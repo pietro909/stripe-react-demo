@@ -18,7 +18,6 @@ export default class AsideToolbar extends Component {
     const handleSubmit = () => console.log(`submit!`)
     return (
       <aside className="col-sm-4">
-        <p>{selectedCustomer.id}</p>
         <CustomerForm
 					cleanFields={unselectCustomer}
 					deleteCustomer={deleteCustomer}

@@ -16,3 +16,4 @@ type Msg
   | UpdateCustomer Customer
   | UpdateList
   | FormMessage Form.Msg
+  | Start Config

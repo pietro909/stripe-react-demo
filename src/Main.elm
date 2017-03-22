@@ -1,6 +1,6 @@
 port module ElmApp exposing (main)
 
-import Html exposing (Html, div, text)
+import Platform
 import List.Extra as Lx
 
 import Api exposing (..)
@@ -11,7 +11,9 @@ import Form
 port errors : List String -> Cmd msg
 port customers : List Customer -> Cmd msg
 port customerInTheEditor : Customer -> Cmd msg
+port started : Bool -> Cmd msg
 
+port start : (Config -> msg) -> Sub msg
 port createCustomer : (Customer -> msg) -> Sub msg
 port updateCustomer : (Customer -> msg) -> Sub msg
 port deleteCustomer : (Customer -> msg) -> Sub msg
@@ -21,30 +23,35 @@ port updateList : (() -> msg) -> Sub msg
 type alias Model =
   { customers : List Customer
   , customerInTheEditor : Customer
-  , errors: List String
-  , api: API
-  , form: Form.Model
+  , errors : List String
+  , config : Config
+  , form : Form.Model
   }
 
-type alias Flags =
-  { apiKey : String }
-
-initialModel : Flags -> Model
-initialModel flags =
+initialModel : Model
+initialModel =
   { customers = []
   , customerInTheEditor = emptyCustomer 
   , errors = []
-  , api = getAPI flags.apiKey
+  , config = Config ""
   , form = Form.initialModel
   }
 
-init : Flags -> (Model, Cmd Msg)
-init flags =
-  ( initialModel flags, Cmd.none )
+initialCommand : Cmd Msg
+initialCommand = Cmd.map FormMessage Form.initialCommand
+
+init : (Model, Cmd Msg)
+init =
+  ( initialModel, initialCommand )
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
+    Start config ->
+      let
+        newModel = { model | config = config }
+      in
+        (model, started True)
     Customers (Err e) ->
       let
         newModel = { model | errors = (toString e)::model.errors }
@@ -58,17 +65,17 @@ update msg model =
         ( newModel, cmd ) 
     CreateCustomer customer ->
       let
-        cmd = model.api.create customer
+        cmd = Api.create model.config.apiKey customer
       in
         ( model, cmd )
     UpdateCustomer customer ->
       let
-        cmd = model.api.update customer
+        cmd = Api.update model.config.apiKey customer
       in
         ( model, cmd )
     DeleteCustomer customer ->
       let
-        cmd = model.api.delete customer
+        cmd = Api.delete model.config.apiKey customer
       in
         ( model, cmd )
     SelectCustomer id ->
@@ -93,15 +100,15 @@ update msg model =
       in
         (newModel, cmd)
     UpdateList ->
-      let cmd = model.api.list
+      let cmd = Api.readAll model.config.apiKey
       in
         ( model, cmd)
     CustomerCreated id ->
-      ( model, model.api.list )
+      ( model, Api.readAll model.config.apiKey )
     CustomerDeleted id ->
-      ( model, model.api.list )
+      ( model, Api.readAll model.config.apiKey )
     CustomerUpdated customer ->
-      ( model, model.api.list )
+      ( model, Api.readAll model.config.apiKey )
     FormMessage msg ->
       let
         (form, formCmd) = Form.update msg model.form
@@ -109,10 +116,6 @@ update msg model =
         cmd = Cmd.map FormMessage formCmd
       in
         (newModel, cmd)
-
-view : Model -> Html Msg
-view model =
-  div [] [ text "Done" ]
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -122,14 +125,14 @@ subscriptions model =
     , updateCustomer UpdateCustomer 
     , selectCustomer SelectCustomer
     , updateList (\_ -> UpdateList)
+    , start Start
     , Sub.map FormMessage (Form.subscriptions model.form)
     ]
 
-main : Program Flags Model Msg
+main : Program Never Model Msg
 main =
-  Html.programWithFlags
+  Platform.program
     { init = init
-    , view = view
     , update = update
     , subscriptions = subscriptions
     }

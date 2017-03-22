@@ -16,11 +16,24 @@ class Input extends Component {
     }
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return (this.state.value !== nextProps.value)
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState((prevState, props) => ({
+      ...prevState,
+      attributes: {
+        ...prevState.attributes,
+        value: props.value
+      }
+    }))
+  }
+
   render() {
     return(
       <input 
         {...this.state.attributes}
-
       />)
   }
 }
@@ -39,12 +52,22 @@ const CustomerForm = (props) => {
       <div className="form-field col-sm-12">
         <label>First Name</label>
         <Input
-          name="firstName"
-          value={model.firstName}
-          onChange={({ target }) => onChange('firstName', target.value)}
+          name={model.firstName.name}
+          value={model.firstName.value}
+          onChange={({target}) => onChange(model.firstName.name, target.value)}
           placeholder="First name"
         />
 			</div>
+      <div className="form-field col-sm-12">
+        <label>Last Name</label>
+        <Input
+          name={model.lastName.name}
+          value={model.lastName.value}
+          onChange={({target}) => onChange(model.lastName.name, target.value)}
+          placeholder="Second name"
+        />
+			</div>
+
     {/*
       <div className="form-field col-sm-12">
 				<label>Last Name</label>

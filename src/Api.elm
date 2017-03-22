@@ -1,4 +1,4 @@
-module Api exposing (API, getAPI)
+module Api exposing (create, update, delete, readAll)
 
 import Http exposing (..)
 import Json.Encode
@@ -8,21 +8,6 @@ import Task
 
 import Models exposing (Customer)
 import Messages exposing (..)
-
-type alias API =
-  { create : Customer -> Cmd Msg
-  , update : Customer -> Cmd Msg
-  , delete : Customer -> Cmd Msg
-  , list : Cmd Msg
-  }
-
-getAPI : String -> API
-getAPI token =
-  { create = create token
-  , update = update token
-  , delete = delete token
-  , list = readAll token
-  }
 
 baseUrl = "https://api.stripe.com/v1/customers"
 urlWithId id = baseUrl ++ "/" ++ id

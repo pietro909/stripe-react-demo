@@ -12,3 +12,6 @@ type alias Customer =
 emptyCustomer =
   Customer 0.0 "" "" "" "" ""
 
+type alias Config =
+  { apiKey : String }
+

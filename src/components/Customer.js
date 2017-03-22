@@ -1,6 +1,4 @@
 import React, { Component, PropTypes } from 'react'
-import { compose } from 'redux'
-import { connect } from 'react-redux'
 
 export default class Customer extends Component {
 
@@ -21,7 +19,6 @@ export default class Customer extends Component {
       email,
       description,
       balance,
-      clickHandler,
       onClick,
     } = this.props
 
