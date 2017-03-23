@@ -4,12 +4,16 @@ class Input extends Component {
   
   constructor(props) {
     super(props)
+    const isNumber = props.type === 'number'
     this.state = {
       attributes: {
         id: props.name,
         name: props.name,
         placeholder: props.placeholder,
         type: props.type || 'text',
+        step: isNumber && props.step, 
+        min: isNumber && props.min, 
+        max: isNumber && props.max, 
         value: props.value,
         onChange: props.onChange,
       }
@@ -25,7 +29,7 @@ class Input extends Component {
       ...prevState,
       attributes: {
         ...prevState.attributes,
-        value: props.value
+        value: nextProps.value
       }
     }))
   }
@@ -43,9 +47,13 @@ const CustomerForm = (props) => {
 		cleanFields,
 		deleteCustomer,
 		model,
-    onSubmit,
+    createCustomer,
     onChange,
 	} = props
+  const onSubmit = e => {
+    e.preventDefault()
+    createCustomer(null)
+  }
   const { fields } = model
   // pristine, submitting...
   return (
@@ -73,10 +81,10 @@ const CustomerForm = (props) => {
         <Input
           type="number"
           step="0.1"
-          min="0"
+          min="0.0"
           name={fields.balance.name}
           value={fields.balance.value}
-          onChange={({target}) => onChange(fields.balance.name, target.value)}
+          onChange={({ target }) => onChange(fields.balance.name, target.value)}
         />
 			</div>
       <div className="form-field col-sm-12">
@@ -99,8 +107,8 @@ const CustomerForm = (props) => {
         />
 			</div>
       <div className="buttons col-sm-12">
-        <button type="onSubmit" className="btn btn-default"
-          onClick={onSubmit}>Submit</button>
+        <button type="submit" className="btn btn-default"
+          >Submit</button>
         <button type="button" className="btn btn-primary"
           onClick={cleanFields}>Clear Values</button>
         <button type="button" className="btn btn-danger"

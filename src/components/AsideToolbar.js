@@ -10,6 +10,7 @@ export default class AsideToolbar extends Component {
  
   render() {
 		const {
+      createCustomer,
 			deleteCustomer,
 			selectedCustomer,
       unselectCustomer,
@@ -21,6 +22,7 @@ export default class AsideToolbar extends Component {
         <CustomerForm
 					cleanFields={unselectCustomer}
 					deleteCustomer={deleteCustomer}
+          createCustomer={createCustomer}
 					model={selectedCustomer} 
 					onSubmit={handleSubmit}
           onChange={updateForm}

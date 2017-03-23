@@ -14,7 +14,7 @@ class TheApp extends Component {
 
   render() {
     const {
-      addCustomer,
+      createCustomer,
       deleteCustomer,
       selectCustomer,
       updateCustomer,
@@ -32,6 +32,7 @@ class TheApp extends Component {
         <Header/>
         <div className="row">
           <AsideToolbar
+            createCustomer={createCustomer}
             deleteCustomer={deleteCustomer}
             selectedCustomer={formUpdated}
             unselectCustomer={() => selectCustomer('')}

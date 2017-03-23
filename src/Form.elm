@@ -3,16 +3,15 @@ port module Form exposing (..)
 import Dict exposing (Dict)
 import Json.Encode as JEnc
 
-type alias FormInput = (String, String)
-type FieldType
-  = FTString String
-  | FTFloat Float
+import Validation exposing (..)
 
+type alias FormInput = (String, String)
 type alias FormField =
   { active : Bool
   , dirty : Bool
   , disabled : Bool
   , name : String
+  , validator : String -> FieldType
   , value : FieldType
   }
 
@@ -23,12 +22,14 @@ type alias FormState =
 
 makeFormField : String -> FieldType -> FormField
 makeFormField name value =
-  FormField False False False name value
+  FormField False False False name typeForFieldString value
 
 updateFormFieldValue : (FieldType -> Bool) -> FieldType -> FormField -> Maybe FormField
 updateFormFieldValue validate value field =
   if (validate value) then
-    Just (FormField field.active field.dirty field.disabled field.name value)
+    FormField
+      field.active field.dirty field.disabled field.name field.validator value
+        |> Just
   else Nothing
 
 stringToFloat : String -> Float -> Float
@@ -67,32 +68,20 @@ initialCommand =
 type Msg
   = UpdateFormField FormInput
 
-validateTrue : a -> Bool
-validateTrue v = True
 
-uff : FieldType -> Maybe FormField -> Maybe FormField
+uff : String -> Maybe FormField -> Maybe FormField
 uff value maybeField =
   Maybe.map
-    (\f -> FormField f.active f.dirty f.disabled f.name value)
+    (\f -> FormField f.active f.dirty f.disabled f.name f.validator (f.validator value))
     maybeField
 
 updateFormField : String -> String -> Model -> Model
 updateFormField name value model =
   let
     updated : Dict String FormField
-    updated = Dict.update name (uff <| FTString value) model.fields
+    updated = Dict.update name (uff value) model.fields
   in
     { model | fields = updated }
-
-    {--
-    "firstName" -> 
-      let
-        case (updateFormFieldValue valididateTrue value model.firstName) of
-          Just field ->
-          Nothing ->
-        
-      --}
-
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =

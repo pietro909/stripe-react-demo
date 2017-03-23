@@ -2,11 +2,13 @@ port module ElmApp exposing (main)
 
 import Platform
 import List.Extra as Lx
+import Dict
 
 import Api exposing (..)
 import Models exposing (..)
 import Messages exposing (..)
 import Form
+import Validation
 
 port errors : List String -> Cmd msg
 port customers : List Customer -> Cmd msg
@@ -14,7 +16,7 @@ port customerInTheEditor : Customer -> Cmd msg
 port started : Bool -> Cmd msg
 
 port start : (Config -> msg) -> Sub msg
-port createCustomer : (Customer -> msg) -> Sub msg
+port createCustomer : (() -> msg) -> Sub msg
 port updateCustomer : (Customer -> msg) -> Sub msg
 port deleteCustomer : (Customer -> msg) -> Sub msg
 port selectCustomer : (String -> msg) -> Sub msg
@@ -44,6 +46,39 @@ init : (Model, Cmd Msg)
 init =
   ( initialModel, initialCommand )
 
+formToCustomer : Form.Model -> Maybe Customer
+formToCustomer form =
+  let
+    balance = Just 0.3
+    description =
+      Dict.get "description" form.fields
+        |> Maybe.andThen (\f -> Result.toMaybe <| Validation.unboxString f.value)
+    email =
+      Dict.get "email" form.fields
+        |> Maybe.andThen (\f -> Result.toMaybe <| Validation.unboxString f.value)
+    firstName =
+      Dict.get "firstName" form.fields
+        |> Maybe.andThen (\f -> Result.toMaybe <| Validation.unboxString f.value)
+    id = 
+      Dict.get "id" form.fields
+        |> Maybe.andThen (\f -> Result.toMaybe <| Validation.unboxString f.value)
+        |> Maybe.withDefault ""
+    lastName =
+      Dict.get "lastName" form.fields
+        |> Maybe.andThen (\f -> Result.toMaybe <| Validation.unboxString f.value)
+  in
+    case (balance, description, email, firstName, lastName) of
+      (Just b, Just d, Just e, Just fn, Just ln) ->
+        Just <| (Debug.log "c" (Customer b d e fn id ln))
+      _ -> Nothing
+
+actionLogger : (Msg -> Model -> (Model, Cmd Msg)) -> Msg -> Model -> (Model, Cmd Msg)
+actionLogger f msg model =
+  let
+    m = Debug.log "message" msg
+  in
+    f m model
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
@@ -63,11 +98,14 @@ update msg model =
         cmd = customers list
       in
         ( newModel, cmd ) 
-    CreateCustomer customer ->
-      let
-        cmd = Api.create model.config.apiKey customer
-      in
-        ( model, cmd )
+    CreateCustomer ->
+      case (formToCustomer model.form) of
+        Just c ->
+          let cmd = Api.create model.config.apiKey c
+          in
+            ( model, cmd )
+        Nothing ->
+          ( model, Cmd.none )
     UpdateCustomer customer ->
       let
         cmd = Api.update model.config.apiKey customer
@@ -124,7 +162,7 @@ update msg model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
-    [ createCustomer CreateCustomer
+    [ createCustomer (\_ -> CreateCustomer)
     , deleteCustomer DeleteCustomer 
     , updateCustomer UpdateCustomer 
     , selectCustomer SelectCustomer
@@ -137,6 +175,6 @@ main : Program Never Model Msg
 main =
   Platform.program
     { init = init
-    , update = update
+    , update = actionLogger update
     , subscriptions = subscriptions
     }
