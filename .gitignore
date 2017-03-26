@@ -4,6 +4,5 @@ elm-stuff/
 *.log
 *.lock
 *.env
-ElmApp.js
 start.sh
 .DS_Store
