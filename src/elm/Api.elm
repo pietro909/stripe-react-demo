@@ -1,14 +1,26 @@
-module Api exposing (create, update, delete, readAll)
+module Api exposing (create, update, delete, readAll, errorExtractor)
 
 import Http exposing (..)
 import Json.Encode
-import Json.Decode exposing (Decoder, decodeValue, int, float, list, string)
+import Json.Decode exposing (Decoder, decodeString, decodeValue, int, float, list, string)
 import Json.Decode.Pipeline exposing (decode, required, requiredAt, optional, optionalAt)
 import Task
 
 
 import Models exposing (Customer)
 import Messages exposing (..)
+
+errorDecoder : Json.Decode.Decoder String
+errorDecoder =
+    Json.Decode.at [ "error" ]
+       ( Json.Decode.string )
+
+errorExtractor : Error -> String
+errorExtractor error =
+  case error of
+    BadStatus response ->
+      Result.withDefault "Unknown error" (decodeString errorDecoder response.body)
+    _ -> "We apologize, something went wrong."
 
 baseUrl = "https://api.stripe.com/v1/customers"
 urlWithId id = baseUrl ++ "/" ++ id

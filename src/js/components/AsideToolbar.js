@@ -10,10 +10,11 @@ export default class AsideToolbar extends Component {
  
   render() {
 		const {
-      createCustomer,
 			deleteCustomer,
 			selectedCustomer,
+      createCustomer,
       unselectCustomer,
+      updateCustomer,
       updateForm,
 		} = this.props
     const handleSubmit = () => console.log(`submit!`)
@@ -22,10 +23,11 @@ export default class AsideToolbar extends Component {
         <CustomerForm
 					cleanFields={unselectCustomer}
 					deleteCustomer={deleteCustomer}
-          createCustomer={createCustomer}
 					model={selectedCustomer} 
 					onSubmit={handleSubmit}
+          createCustomer={createCustomer}
           onChange={updateForm}
+          updateCustomer={updateCustomer}
 				/>
      </aside>
     )

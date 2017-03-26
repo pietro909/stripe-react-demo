@@ -49,14 +49,18 @@ const CustomerForm = (props) => {
 		model,
     createCustomer,
     onChange,
+    updateCustomer,
 	} = props
+  const { fields } = model
+  const isUpdate = !!fields.id.value
   const onSubmit = e => {
     e.preventDefault()
-    createCustomer(null)
+    if (isUpdate) {
+      updateCustomer(null)
+    } else {
+      createCustomer(null)
+    }
   }
-  const { fields } = model
-  // pristine, submitting...
-  const submitText = fields.id.value ? 'Update' : 'Submit'
   return (
     <form onSubmit={onSubmit} className="row">
       <div className="form-field col-sm-12">
@@ -109,10 +113,11 @@ const CustomerForm = (props) => {
 			</div>
       <div className="buttons col-sm-12">
         <button type="submit" className="btn btn-default"
-          >{submitText}</button>
+          >{isUpdate ? 'Update' : 'Submit'}</button>
         <button type="button" className="btn btn-primary"
           onClick={cleanFields}>Clear Values</button>
         <button type="button" className="btn btn-danger"
+          disabled={!isUpdate}
           onClick={() => deleteCustomer(null)}>Delete</button>
       </div>
     </form>

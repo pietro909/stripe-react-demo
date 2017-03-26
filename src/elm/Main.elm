@@ -10,7 +10,7 @@ import Messages exposing (..)
 import Form
 import Validation
 
-port statusMessages : String -> Cmd msg
+port statusMessages : StatusMessage -> Cmd msg
 port errors : String -> Cmd msg
 
 port customers : List Customer -> Cmd msg
@@ -23,6 +23,11 @@ port updateCustomer : (() -> msg) -> Sub msg
 port deleteCustomer : (() -> msg) -> Sub msg
 port selectCustomer : (String -> msg) -> Sub msg
 port updateList : (() -> msg) -> Sub msg
+
+type alias StatusMessage =
+  { message : String
+  , level : Int
+  }
 
 type alias Model =
   { customers : List Customer
@@ -101,17 +106,30 @@ update msg model =
 
     Start config ->
       let
+        (message, startCmd) = 
+          if (String.isEmpty config.apiKey) then
+            (StatusMessage "No API key found! check src/API.js and the README for more information." 3, Cmd.none)
+          else
+            (StatusMessage "Welcome to version 0.1" 1, Api.readAll config.apiKey)
+        cmd = Cmd.batch
+          [ statusMessages message
+          , started True
+          , startCmd
+          ]
         newModel = { model | config = config }
       in 
-        (newModel, started True)
+        (newModel, cmd)
 
     Customers (Err e) ->
-      (model, errors <| toString e)
+      let
+        infoCmd = statusMessages <| StatusMessage (errorExtractor e) 3
+      in
+        (model, infoCmd)
     Customers (Ok list) ->
       let
         newModel = { model | customers = list }
         customersCmd = customers list
-        infoCmd = statusMessages ("Read " ++ (toString <| List.length list) ++ " customers.")
+        infoCmd = statusMessages <| StatusMessage ("Read " ++ (toString <| List.length list) ++ " customers.") 1
         cmd = Cmd.batch [ infoCmd, customersCmd ]
       in
         ( newModel, cmd )
@@ -125,7 +143,7 @@ update msg model =
           case resultCmd of
             Ok c -> c
             Err c -> Cmd.batch c
-        infoCmd = statusMessages "Creating customer..."
+        infoCmd = statusMessages  <| StatusMessage "Creating customer..." 2
         cmd = Cmd.batch [ infoCmd, creationCmd ]
       in
         ( model, cmd )
@@ -139,7 +157,7 @@ update msg model =
           case resultCmd of
             Ok c -> c
             Err c -> Cmd.batch c
-        infoCmd = statusMessages "Creating customer..."
+        infoCmd = statusMessages <| StatusMessage "Updating customer..." 2
         cmd = Cmd.batch [ infoCmd, updateCmd ]
       in
         ( model, cmd )
@@ -154,7 +172,7 @@ update msg model =
             Ok c -> c
             Err c -> Cmd.batch  c
         infoCmd =
-            statusMessages "Deleting customer..."
+            statusMessages <| StatusMessage "Deleting customer..." 2
         cmd = Cmd.batch [ infoCmd, deleteCmd ]
 
       in
@@ -169,10 +187,13 @@ update msg model =
               let
                 form = Form.fromCustomer customer
                 newModel = { model | form = form }
-                cmd =
+                formCmd =
                   Form.encodeModel form
                     |> Form.formUpdated
                     |> Cmd.map FormMessage
+                message = statusMessages <| StatusMessage ("Selected #" ++ customer.id) 1
+                cmd = Cmd.batch
+                  [ formCmd, message ]
               in
                 (newModel, cmd)
 
@@ -191,7 +212,7 @@ update msg model =
     UpdateList ->
       let 
         readCmd = Api.readAll model.config.apiKey
-        infoCmd = statusMessages "Loading customers list..."
+        infoCmd = statusMessages <| StatusMessage "Fetching customers..." 2
         cmd = Cmd.batch [ infoCmd, readCmd ]
       in
         ( model, cmd)
@@ -225,6 +246,6 @@ main : Program Never Model Msg
 main =
   Platform.program
     { init = init
-    , update = actionLogger update
+    , update = update --actionLogger update
     , subscriptions = subscriptions
     }

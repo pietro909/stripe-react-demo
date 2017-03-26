@@ -18,8 +18,9 @@ class TheApp extends Component {
       createCustomer,
       deleteCustomer,
       selectCustomer,
-      updateList,
+      updateCustomer,
       updateForm,
+      updateList,
     } = this.props.outgoing
     const { 
       customers,
@@ -27,15 +28,17 @@ class TheApp extends Component {
       statusMessages,
     } = this.props.incoming
     const updateFormField = (name, value) => updateForm([name, value])
+    const statusMessage = statusMessages || {}
     return (
       <article>
-        <Header message={statusMessages}/>
+        <Header message={statusMessages.message} level={statusMessage.level}/>
         <div className="row">
           <AsideToolbar
             createCustomer={createCustomer}
             deleteCustomer={deleteCustomer}
             selectedCustomer={formUpdated}
             unselectCustomer={() => selectCustomer('')}
+            updateCustomer={updateCustomer}
             updateForm={updateFormField}
           />
           <MainSection
@@ -54,6 +57,10 @@ const options = {
     apiKey: process.env.REACT_APP_API_KEY,
   },
   debug: true,
+}
+
+if (!process.env.REACT_APP_API_KEY) {
+  throw new Error("Cannot find REACT_APP_API_KEY. Please read the README.")
 }
 
 const App = appWithElm(options)(TheApp)
