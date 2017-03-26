@@ -20,11 +20,13 @@ Make sure you get you own API key from Stripe and put it in the `.env` file with
 REACT_APP_API_KEY=sk_test_yoursupersecretapikey
 ```
 
+Install Elm [using these instructions](https://guide.elm-lang.org/install.html).
+
 Then run the installers:
 
 ```
 $ npm install
-$ elm install
+$ elm-package install
 ```
 
 ## Available Scripts
