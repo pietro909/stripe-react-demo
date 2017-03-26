@@ -5,6 +5,7 @@ import MainSection from './components/MainSection'
 
 import { appWithElm } from './ElmApp'
 
+
 class TheApp extends Component {
   static propTypes = {
     incoming: PropTypes.object.isRequired,
@@ -17,12 +18,10 @@ class TheApp extends Component {
       createCustomer,
       deleteCustomer,
       selectCustomer,
-      updateCustomer,
       updateList,
       updateForm,
     } = this.props.outgoing
     const { 
-      customerInTheEditor,
       customers,
       formUpdated,
       statusMessages,

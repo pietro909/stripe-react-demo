@@ -19,6 +19,8 @@ var publicUrl = '';
 // Get enrivonment variables to inject into our app.
 var env = getClientEnvironment(publicUrl);
 
+var elmSource = __dirname + '/src/elm'
+
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
 // The production configuration is different and lives in a separate file.
@@ -74,7 +76,7 @@ module.exports = {
     // We also include JSX as a common component filename extension to support
     // some tools, although we do not recommend using it, see:
     // https://github.com/facebookincubator/create-react-app/issues/290
-    extensions: ['.js', '.json', '.jsx', ''],
+    extensions: ['.js', '.json', '.jsx', '.elm', ''],
     alias: {
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
@@ -83,6 +85,8 @@ module.exports = {
   },
   
   module: {
+    // Exclude Elm files from being parsed
+    noParse: /\.elm$/,
     // First, run the linter.
     // It's important to do this before Babel processes the JS.
     preLoaders: [
@@ -93,6 +97,12 @@ module.exports = {
       }
     ],
     loaders: [
+      // Elm sources
+      {
+        test:    /\.elm$/,
+        exclude: [/elm-stuff/, /node_modules/],
+        loader:  'elm-hot!elm-webpack?verbose=true&warn=true&debug=true'
+      },
       // Process JS with Babel.
       {
         test: /\.(js|jsx)$/,

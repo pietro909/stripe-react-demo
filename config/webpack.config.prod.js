@@ -8,6 +8,8 @@ var url = require('url');
 var paths = require('./paths');
 var getClientEnvironment = require('./env');
 
+var elmSource = __dirname + '/src/elm'
+
 function ensureSlash(path, needsSlash) {
   var hasSlash = path.endsWith('/');
   if (hasSlash && !needsSlash) {
@@ -78,7 +80,7 @@ module.exports = {
     // We also include JSX as a common component filename extension to support
     // some tools, although we do not recommend using it, see:
     // https://github.com/facebookincubator/create-react-app/issues/290
-    extensions: ['.js', '.json', '.jsx', ''],
+    extensions: ['.js', '.json', '.jsx', '.elm', ''],
     alias: {
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
@@ -97,6 +99,12 @@ module.exports = {
       }
     ],
     loaders: [
+      // Elm sources
+      {
+        test: /\.elm$/,
+        exclude: [/elm-stuff/, /node_modules/],
+        loader: 'elm-webpack-loader?verbose=true&maxInstances=8&cwd=' + elmSource
+      },
       // Process JS with Babel.
       {
         test: /\.(js|jsx)$/,

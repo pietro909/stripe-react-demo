@@ -5,6 +5,7 @@ const API_KEY = ''
 
 const BASE_URL = 'https://api.stripe.com/v1/customers'
 
+
 const headers = {
 	'Authorization':`Bearer ${API_KEY}`,
 	'Content-Type': 'application/x-www-form-urlencoded'
