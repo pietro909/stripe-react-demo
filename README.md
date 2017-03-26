@@ -1,20 +1,31 @@
 # Stripe and React demo
-## Customers' CRUD application using Stripe API and React with Redux.
+## Customers' CRUD application using Stripe API and React with Elm.
 
 Sample project.
 
 Additional libraries:
 
-* [Redux](http://redux.js.org/) for state management
+* [Elm](http://www.elm-lang.org/) for state and effects management
 * [Bootstrap](http://getbootstrap.com/) as UI framework
 
-This project template was built with [Create React App](https://github.com/facebookincubator/create-react-app).A
+This project template was built with [Create React App](https://github.com/facebookincubator/create-react-app), then ejected to customize Webpack's configuration.
 
 Using [Stripe API](https://stripe.com/docs/api#list_customers) for customers' management.
 
 ## Before running
 
-Make sure you get you own API key from Stripe and put it in `src/API.js` 
+Make sure you get you own API key from Stripe and put it in the `.env` file with the format:
+
+```
+REACT_APP_API_KEY=sk_test_yoursupersecretapikey
+```
+
+Then run the installers:
+
+```
+$ npm install
+$ elm install
+```
 
 ## Available Scripts
 
