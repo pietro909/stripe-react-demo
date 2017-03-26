@@ -18,9 +18,10 @@ export default class Header extends Component {
     return (
       <header className="header row">
         <h1 className="col-sm-4">Customers</h1>
-				<div className="col-sm-4">
+        {message && <div className="col-sm-4">
 					<div className={`alert alert-${alertClass}`}>{message || ''}</div>
 				</div>
+        }
       </header>
     )
   }
