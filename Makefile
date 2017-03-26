@@ -1,3 +1,3 @@
 elm:
-	elm make src/Main.elm --output public/ElmApp.js
+	elm make src/elm/Main.elm --output public/ElmApp.js
 
