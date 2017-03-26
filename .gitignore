@@ -6,3 +6,4 @@ elm-stuff/
 *.env
 ElmApp.js
 start.sh
+.DS_Store
