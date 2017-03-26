@@ -89,6 +89,8 @@ module.exports = {
   },
   
   module: {
+    // Exclude Elm files from being parsed
+    noParse: /\.elm$/,
     // First, run the linter.
     // It's important to do this before Babel processes the JS.
     preLoaders: [
@@ -103,7 +105,7 @@ module.exports = {
       {
         test: /\.elm$/,
         exclude: [/elm-stuff/, /node_modules/],
-        loader: 'elm-webpack-loader?verbose=true&maxInstances=8&cwd=' + elmSource
+        loader: 'elm-webpack?verbose=true&maxInstances=2'
       },
       // Process JS with Babel.
       {

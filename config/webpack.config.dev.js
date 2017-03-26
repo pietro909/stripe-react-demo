@@ -19,8 +19,6 @@ var publicUrl = '';
 // Get enrivonment variables to inject into our app.
 var env = getClientEnvironment(publicUrl);
 
-var elmSource = __dirname + '/src/elm'
-
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
 // The production configuration is different and lives in a separate file.
