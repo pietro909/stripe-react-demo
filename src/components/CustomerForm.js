@@ -56,6 +56,7 @@ const CustomerForm = (props) => {
   }
   const { fields } = model
   // pristine, submitting...
+  const submitText = fields.id.value ? 'Update' : 'Submit'
   return (
     <form onSubmit={onSubmit} className="row">
       <div className="form-field col-sm-12">
@@ -108,11 +109,11 @@ const CustomerForm = (props) => {
 			</div>
       <div className="buttons col-sm-12">
         <button type="submit" className="btn btn-default"
-          >Submit</button>
+          >{submitText}</button>
         <button type="button" className="btn btn-primary"
           onClick={cleanFields}>Clear Values</button>
         <button type="button" className="btn btn-danger"
-          onClick={deleteCustomer}>Delete</button>
+          onClick={() => deleteCustomer(null)}>Delete</button>
       </div>
     </form>
   )

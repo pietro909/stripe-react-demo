@@ -10,22 +10,23 @@ import Messages exposing (..)
 import Form
 import Validation
 
-port errors : List String -> Cmd msg
+port statusMessages : String -> Cmd msg
+port errors : String -> Cmd msg
+
 port customers : List Customer -> Cmd msg
 port customerInTheEditor : Customer -> Cmd msg
 port started : Bool -> Cmd msg
 
 port start : (Config -> msg) -> Sub msg
 port createCustomer : (() -> msg) -> Sub msg
-port updateCustomer : (Customer -> msg) -> Sub msg
-port deleteCustomer : (Customer -> msg) -> Sub msg
+port updateCustomer : (() -> msg) -> Sub msg
+port deleteCustomer : (() -> msg) -> Sub msg
 port selectCustomer : (String -> msg) -> Sub msg
 port updateList : (() -> msg) -> Sub msg
 
 type alias Model =
   { customers : List Customer
   , customerInTheEditor : Customer
-  , errors : List String
   , config : Config
   , form : Form.Model
   }
@@ -34,10 +35,14 @@ initialModel : Model
 initialModel =
   { customers = []
   , customerInTheEditor = emptyCustomer 
-  , errors = []
   , config = Config ""
   , form = Form.initialModel
   }
+
+-- takes an error msg, create a command to send it outside
+errorHub : List String -> List (Cmd Msg)
+errorHub errList =
+  List.map errors errList 
 
 initialCommand : Cmd Msg
 initialCommand = Cmd.map FormMessage Form.initialCommand
@@ -46,31 +51,42 @@ init : (Model, Cmd Msg)
 init =
   ( initialModel, initialCommand )
 
-formToCustomer : Form.Model -> Maybe Customer
+type CumulativeResult a
+  = Y a
+  | N (List String)
+
+getFieldValue name extractor fields =
+  Dict.get name fields
+    |> Result.fromMaybe (Validation.NoSuchField name)
+    |> Result.andThen (\f -> extractor f.value)
+    |> Result.mapError (\e -> Debug.log name e)
+
+formToCustomer : Form.Model -> Result (List Validation.ConversionError) Customer
 formToCustomer form =
   let
-    balance = Just 0.3
-    description =
-      Dict.get "description" form.fields
-        |> Maybe.andThen (\f -> Result.toMaybe <| Validation.unboxString f.value)
-    email =
-      Dict.get "email" form.fields
-        |> Maybe.andThen (\f -> Result.toMaybe <| Validation.unboxString f.value)
-    firstName =
-      Dict.get "firstName" form.fields
-        |> Maybe.andThen (\f -> Result.toMaybe <| Validation.unboxString f.value)
-    id = 
-      Dict.get "id" form.fields
-        |> Maybe.andThen (\f -> Result.toMaybe <| Validation.unboxString f.value)
-        |> Maybe.withDefault ""
-    lastName =
-      Dict.get "lastName" form.fields
-        |> Maybe.andThen (\f -> Result.toMaybe <| Validation.unboxString f.value)
+    balance = getFieldValue "balance" Validation.unboxFloat form.fields
+    description = getFieldValue "description" Validation.unboxString form.fields
+    email = getFieldValue "email" Validation.unboxString form.fields
+    firstName = getFieldValue "firstName" Validation.unboxString form.fields
+    id = getFieldValue "id" Validation.unboxString form.fields
+    lastName = getFieldValue "lastName" Validation.unboxString form.fields
   in
-    case (balance, description, email, firstName, lastName) of
-      (Just b, Just d, Just e, Just fn, Just ln) ->
-        Just <| (Debug.log "c" (Customer b d e fn id ln))
-      _ -> Nothing
+    case (balance, description, email, firstName, id, lastName) of
+      (Ok b, Ok d, Ok e, Ok fn, Ok i, Ok ln) ->
+        Customer b d e fn i ln
+          |> Ok
+      _ -> 
+        filterErrors [description, email, firstName, id, lastName] ++
+        filterErrors [balance]
+          |> Err
+                
+filterErrors list =
+  List.filterMap
+    (\r ->
+      case r of
+        Err e -> Just e
+        _ -> Nothing)
+    list
 
 actionLogger : (Msg -> Model -> (Model, Cmd Msg)) -> Msg -> Model -> (Model, Cmd Msg)
 actionLogger f msg model =
@@ -82,67 +98,101 @@ actionLogger f msg model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
+
     Start config ->
       let
         newModel = { model | config = config }
       in 
         (newModel, started True)
+
     Customers (Err e) ->
-      let
-        newModel = { model | errors = (toString e)::model.errors }
-      in
-        (newModel, Cmd.none)
+      (model, errors <| toString e)
     Customers (Ok list) ->
       let
         newModel = { model | customers = list }
-        cmd = customers list
+        customersCmd = customers list
+        infoCmd = statusMessages ("Read " ++ (toString <| List.length list) ++ " customers.")
+        cmd = Cmd.batch [ infoCmd, customersCmd ]
       in
-        ( newModel, cmd ) 
+        ( newModel, cmd )
+
     CreateCustomer ->
-      case (formToCustomer model.form) of
-        Just c ->
-          let cmd = Api.create model.config.apiKey c
-          in
-            ( model, cmd )
-        Nothing ->
-          ( model, Cmd.none )
-    UpdateCustomer customer ->
       let
-        cmd = Api.update model.config.apiKey customer
+        resultCmd = formToCustomer model.form
+          |> Result.map (Api.create model.config.apiKey)
+          |> Result.mapError (\le -> errorHub <| (List.map toString le))
+        creationCmd =
+          case resultCmd of
+            Ok c -> c
+            Err c -> Cmd.batch c
+        infoCmd = statusMessages "Creating customer..."
+        cmd = Cmd.batch [ infoCmd, creationCmd ]
       in
         ( model, cmd )
-    DeleteCustomer customer ->
+
+    UpdateCustomer ->
       let
-        cmd = Api.delete model.config.apiKey customer
+        resultCmd = formToCustomer model.form
+          |> Result.map (Api.update model.config.apiKey)
+          |> Result.mapError (\le -> errorHub <| (List.map toString le))
+        updateCmd =
+          case resultCmd of
+            Ok c -> c
+            Err c -> Cmd.batch c
+        infoCmd = statusMessages "Creating customer..."
+        cmd = Cmd.batch [ infoCmd, updateCmd ]
       in
         ( model, cmd )
+
+    DeleteCustomer ->
+      let
+        resultCmd = formToCustomer model.form
+          |> Result.map (Api.delete model.config.apiKey)
+          |> Result.mapError (\le -> errorHub <| (List.map toString le))
+        deleteCmd =
+          case resultCmd of
+            Ok c -> c
+            Err c -> Cmd.batch  c
+        infoCmd =
+            statusMessages "Deleting customer..."
+        cmd = Cmd.batch [ infoCmd, deleteCmd ]
+
+      in
+        ( model, cmd )
+
     SelectCustomer id ->
       let
         maybeCustomer = Lx.find (\c -> c.id == id) model.customers
         (newModel, cmd) =
           case maybeCustomer of
+            Just customer ->
+              let
+                form = Form.fromCustomer customer
+                newModel = { model | form = form }
+                cmd =
+                  Form.encodeModel form
+                    |> Form.formUpdated
+                    |> Cmd.map FormMessage
+              in
+                (newModel, cmd)
+
             Nothing ->
               let
-                error = "Can't find id " ++ id
                 newModel =
-                  { model
-                    | errors = error :: model.errors
-                    , form = Form.initialModel
-                  }
-                cmd = Cmd.batch
-                  [ Cmd.map FormMessage (Form.formUpdated (Form.encodeModel newModel.form))
-                  , errors newModel.errors
-                  ]
+                  { model | form = Form.initialModel }
+                cmd = 
+                  Form.encodeModel newModel.form
+                    |> Form.formUpdated
+                    |> Cmd.map FormMessage
               in
                 ( newModel, cmd )
-            Just customer ->
-              ( model --{ model | selectedCustomer = customer }
-              , customerInTheEditor customer
-              )
       in
         (newModel, cmd)
     UpdateList ->
-      let cmd = Api.readAll model.config.apiKey
+      let 
+        readCmd = Api.readAll model.config.apiKey
+        infoCmd = statusMessages "Loading customers list..."
+        cmd = Cmd.batch [ infoCmd, readCmd ]
       in
         ( model, cmd)
     CustomerCreated id ->
@@ -163,8 +213,8 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
     [ createCustomer (\_ -> CreateCustomer)
-    , deleteCustomer DeleteCustomer 
-    , updateCustomer UpdateCustomer 
+    , deleteCustomer (\_ -> DeleteCustomer) 
+    , updateCustomer (\_ -> UpdateCustomer)
     , selectCustomer SelectCustomer
     , updateList (\_ -> UpdateList)
     , start Start

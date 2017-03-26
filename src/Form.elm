@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Json.Encode as JEnc
 
 import Validation exposing (..)
+import Models exposing (Customer, emptyCustomer)
 
 type alias FormInput = (String, String)
 type alias FormField =
@@ -20,9 +21,13 @@ type alias FormState =
   , hasErrors : Bool
   }
 
-makeFormField : String -> FieldType -> FormField
-makeFormField name value =
-  FormField False False False name typeForFieldString value
+makeStringField : String -> FieldType -> FormField
+makeStringField name value =
+  FormField False False False name FTString value
+
+makeFloatField : String -> FieldType -> FormField
+makeFloatField name value =
+  FormField False False False name typeForFieldFloat value
 
 updateFormFieldValue : (FieldType -> Bool) -> FieldType -> FormField -> Maybe FormField
 updateFormFieldValue validate value field =
@@ -52,13 +57,18 @@ type alias Model =
   }
 
 initialModel =
+  fromCustomer emptyCustomer
+
+fromCustomer : Customer -> Model
+fromCustomer customer =
   { fields =
     Dict.empty
-      |> Dict.insert "balance" (makeFormField "balance" <| FTFloat 0.0)
-      |> Dict.insert "description" (makeFormField "description" <| FTString "")
-      |> Dict.insert "email" (makeFormField "email" <| FTString "")
-      |> Dict.insert "firstName" (makeFormField "firstName" <| FTString "")
-      |> Dict.insert "lastName" (makeFormField "lastName" <| FTString "")
+      |> Dict.insert "balance" (makeFloatField "balance" <| FTFloat customer.balance)
+      |> Dict.insert "description" (makeStringField "description" <| FTString customer.description)
+      |> Dict.insert "email" (makeStringField "email" <| FTString customer.email)
+      |> Dict.insert "firstName" (makeStringField "firstName" <| FTString customer.firstName)
+      |> Dict.insert "id" (makeStringField "id" <| FTString customer.id)
+      |> Dict.insert "lastName" (makeStringField "lastName" <| FTString customer.lastName)
   , state = FormState False False
   }
 
@@ -68,18 +78,18 @@ initialCommand =
 type Msg
   = UpdateFormField FormInput
 
-
-uff : String -> Maybe FormField -> Maybe FormField
-uff value maybeField =
+valueToField : String -> Maybe FormField -> Maybe FormField
+valueToField value maybeField =
   Maybe.map
-    (\f -> FormField f.active f.dirty f.disabled f.name f.validator (f.validator value))
+    (\f ->
+      FormField f.active f.dirty f.disabled f.name f.validator (f.validator value)
+    )
     maybeField
 
 updateFormField : String -> String -> Model -> Model
 updateFormField name value model =
   let
-    updated : Dict String FormField
-    updated = Dict.update name (uff value) model.fields
+    updated = Dict.update name (valueToField value) model.fields
   in
     { model | fields = updated }
 

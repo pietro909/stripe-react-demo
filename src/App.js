@@ -25,11 +25,12 @@ class TheApp extends Component {
       customerInTheEditor,
       customers,
       formUpdated,
+      statusMessages,
     } = this.props.incoming
     const updateFormField = (name, value) => updateForm([name, value])
     return (
       <article>
-        <Header/>
+        <Header message={statusMessages}/>
         <div className="row">
           <AsideToolbar
             createCustomer={createCustomer}

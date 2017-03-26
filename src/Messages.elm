@@ -11,9 +11,9 @@ type Msg
   | CustomerCreated (Result Http.Error Customer)
   | CustomerDeleted (Result Http.Error String)
   | CustomerUpdated (Result Http.Error Customer)
-  | DeleteCustomer Customer
+  | DeleteCustomer 
   | SelectCustomer String
-  | UpdateCustomer Customer
+  | UpdateCustomer
   | UpdateList
   | FormMessage Form.Msg
   | Start Config
