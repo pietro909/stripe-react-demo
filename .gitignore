@@ -6,3 +6,4 @@ elm-stuff/
 *.env
 start.sh
 .DS_Store
+www/

@@ -27,8 +27,8 @@ var nodePaths = (process.env.NODE_PATH || '')
 // config after eject: we're in ./config/
 module.exports = {
   appBuild: resolveApp('build'),
-  appPublic: resolveApp('public'),
-  appHtml: resolveApp('public/index.html'),
+  appPublic: resolveApp('www'),
+  appHtml: resolveApp('www/index.html'),
   appIndexJs: resolveApp('src/js/index.js'),
   appPackageJson: resolveApp('package.json'),
   appSrc: resolveApp('src'),
