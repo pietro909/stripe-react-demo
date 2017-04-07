@@ -1,0 +1,21 @@
+{
+  "parser": "babel-eslint",
+  "extends": "eslint-config-airbnb",
+  "rules": {
+    "semi": [2, "never"],
+    "arrow-body-style": "off",
+    "react/forbid-prop-types": "off",
+    "react/require-default-props": "off",
+    "react/jsx-filename-extension": "off",
+    "arrow-parens": "off"
+  },
+  "plugins": [
+    "react"
+  ],
+  "globals": {
+    "__CLIENT__": true,
+    "__DEVELOPMENT__": true,
+    "__DEVTOOLS__": true,
+    "__SERVER__": true
+  }
+}

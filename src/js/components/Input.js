@@ -1,7 +1,18 @@
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 
 export default class Input extends Component {
-  
+
+  propTypes = {
+    name: PropTypes.string.isRequired,
+    placeholder: PropTypes.string,
+    type: PropTypes.string,
+    step: PropTypes.number,
+    min: PropTypes.number,
+    max: PropTypes.number,
+    value: PropTypes.string,
+    onChange: PropTypes.func.isRequired,
+  }
+
   constructor(props) {
     super(props)
     const isNumber = props.type === 'number'
@@ -11,35 +22,33 @@ export default class Input extends Component {
         name: props.name,
         placeholder: props.placeholder,
         type: props.type || 'text',
-        step: isNumber && props.step, 
-        min: isNumber && props.min, 
-        max: isNumber && props.max, 
+        step: isNumber && props.step,
+        min: isNumber && props.min,
+        max: isNumber && props.max,
         value: props.value,
         onChange: props.onChange,
-      }
+      },
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return (this.state.value !== nextProps.value)
-  }
-
   componentWillReceiveProps(nextProps) {
-    this.setState((prevState, props) => ({
+    this.setState(prevState => ({
       ...prevState,
       attributes: {
         ...prevState.attributes,
-        value: nextProps.value
-      }
+        value: nextProps.value,
+      },
     }))
   }
 
+  shouldComponentUpdate(nextProps) {
+    return (this.state.value !== nextProps.value)
+  }
+
   render() {
-    return(
-      <input 
+    return (
+      <input
         {...this.state.attributes}
       />)
   }
 }
-
-
