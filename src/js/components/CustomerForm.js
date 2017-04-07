@@ -1,15 +1,14 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 import Input from './Input'
 
-const CustomerForm = (props) => {
-  const {
-		cleanFields,
-		deleteCustomer,
-		model,
-    createCustomer,
-    onChange,
-    updateCustomer,
-	} = props
+const CustomerForm = ({
+  deleteCustomer,
+  cleanFields,
+  createCustomer,
+  model,
+  onChange,
+  updateCustomer,
+}) => {
   const { fields } = model
   const isUpdate = !!fields.id.value
   const onSubmit = e => {
@@ -23,64 +22,83 @@ const CustomerForm = (props) => {
   return (
     <form onSubmit={onSubmit} className="row">
       <div className="form-field col-sm-12">
-        <label>First Name</label>
+        <label htmlFor="name">First Name</label>
         <Input
+          id="name"
           name={fields.firstName.name}
-          value={fields.firstName.value}
-          onChange={({target}) => onChange(fields.firstName.name, target.value)}
+          onChange={({ target }) => onChange(fields.firstName.name, target.value)}
           placeholder="First name"
+          value={fields.firstName.value}
         />
-			</div>
+      </div>
       <div className="form-field col-sm-12">
-        <label>Last Name</label>
+        <label htmlFor="lastName">Last Name</label>
         <Input
+          id="lastName"
           name={fields.lastName.name}
-          value={fields.lastName.value}
-          onChange={({target}) => onChange(fields.lastName.name, target.value)}
+          onChange={({ target }) => onChange(fields.lastName.name, target.value)}
           placeholder="Second name"
+          value={fields.lastName.value}
         />
-			</div>
+      </div>
       <div className="form-field col-sm-12">
-        <label>Balance</label>
+        <label htmlFor="balance">Balance</label>
         <Input
-          type="number"
-          step="0.1"
+          id="balance"
           min="0.0"
           name={fields.balance.name}
-          value={fields.balance.value}
           onChange={({ target }) => onChange(fields.balance.name, target.value)}
+          step="0.1"
+          type="number"
+          value={fields.balance.value.toString()}
         />
-			</div>
+      </div>
       <div className="form-field col-sm-12">
-        <label>Email</label>
+        <label htmlFor="email">Email</label>
         <Input
-          type="email"
+          id="email"
           name={fields.email.name}
-          value={fields.email.value}
-          onChange={({target}) => onChange(fields.email.name, target.value)}
+          onChange={({ target }) => onChange(fields.email.name, target.value)}
           placeholder="your@e.mail"
+          type="email"
+          value={fields.email.value}
         />
-			</div>
+      </div>
       <div className="form-field col-sm-12">
-        <label>Description</label>
+        <label htmlFor="description">Description</label>
         <Input
+          id="description"
           name={fields.description.name}
-          value={fields.description.value}
-          onChange={({target}) => onChange(fields.description.name, target.value)}
+          onChange={({ target }) => onChange(fields.description.name, target.value)}
           placeholder="Description"
+          value={fields.description.value}
         />
-			</div>
+      </div>
       <div className="buttons col-sm-12">
-        <button type="submit" className="btn btn-default"
-          >{isUpdate ? 'Update' : 'Submit'}</button>
-        <button type="button" className="btn btn-primary"
-          onClick={cleanFields}>Clear Values</button>
-        <button type="button" className="btn btn-danger"
+        <button type="submit" className="btn btn-default">
+          {isUpdate ? 'Update' : 'Submit'}
+        </button>
+        <button type="button" className="btn btn-primary" onClick={cleanFields}>
+          Clear Values
+        </button>
+        <button
+          className="btn btn-danger"
           disabled={!isUpdate}
-          onClick={() => deleteCustomer(null)}>Delete</button>
+          onClick={() => deleteCustomer(null)}
+          type="button"
+        > Delete </button>
       </div>
     </form>
   )
+}
+
+CustomerForm.propTypes = {
+  cleanFields: PropTypes.func.isRequired,
+  createCustomer: PropTypes.func.isRequired,
+  deleteCustomer: PropTypes.func.isRequired,
+  model: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
+  updateCustomer: PropTypes.func.isRequired,
 }
 
 export default CustomerForm

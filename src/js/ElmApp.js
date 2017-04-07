@@ -1,37 +1,39 @@
 import React, { Component } from 'react'
-import Elm from '../elm/Main'
 
-const bootstrapElm = (elmApp) =>
-  new Promise((resolve, reject) => {
+/* eslint-disable import/no-unresolved */
+/* eslint-disable import/extensions */
+import Elm from '../elm/Main'
+/* eslint-enable import/no-unresolved */
+
+const bootstrapElm = elmApp =>
+  new Promise(resolve => {
     const app = elmApp.worker()
     resolve(app)
   })
 
-export const appWithElm = 
+/* eslint-disable no-console */
+const genericLogger = logger => (label, data) => {
+  console.group(label)
+  if (typeof data === 'object' && typeof data.forEach === 'function') {
+    data.forEach(a => logger(a))
+  } else {
+    logger(data)
+  }
+  console.groupEnd()
+}
+/* eslint-enable no-console */
+
+const noop = () => null
+
+const appWithElm =
   ({ startMessage, debug }) => (WrappedComponent) => {
-    const log = (label, data) => {
-      if (debug) {
-        console.group(label)
-        if (typeof data === 'object' && typeof data.forEach === 'function') {
-          data.forEach(a => console.log(a))
-        } else {
-          console.log(data)
-        }
-        console.groupEnd()
-      }
-    }
-    const warn = (label, data) => {
-      if (debug) {
-        console.group(label)
-        if (typeof data === 'object' && typeof data.forEach === 'function') {
-          data.forEach(a => console.warn(a))
-        } else {
-          console.warn(data)
-        }
-        console.groupEnd()
-      }
-    }
-      
+    /* eslint-disable no-console */
+    const log = debug ? genericLogger(console.log) : noop
+    const warn = debug ? genericLogger(console.warn) : noop
+    /* eslint-enable no-console */
+
+    console.log('CHIAMA UNO!!!')
+
     return class extends Component {
       constructor(props) {
         super(props)
@@ -39,7 +41,7 @@ export const appWithElm =
           ports: {},
           ready: false,
           incoming: {},
-          outgoing: {}
+          outgoing: {},
         }
         const elmApp = Elm.ElmApp
         bootstrapElm(elmApp).then(app => {
@@ -49,11 +51,13 @@ export const appWithElm =
             const port = app.ports[portId]
             if (portId === 'started') {
               const callback = data =>
+                /* eslint-disable no-undef */
                 requestAnimationFrame(() => {
+                  /* eslint-enable no-undef */
                   log(`receive ${portId}`, data)
-                  this.setState((prevState, props) => ({
+                  this.setState(() => ({
                     ports: app.ports,
-                    ready: true
+                    ready: true,
                   }))
                   port.unsubscribe(callback)
                 })
@@ -61,36 +65,36 @@ export const appWithElm =
             } else if (port.subscribe) {
               portsOut.push(portId)
               if (portId === 'errors') {
-                port.subscribe(data => this.setState((prevState, props) => {
+                port.subscribe(data => this.setState(() => {
                   warn(`receive ${portId}`, data)
-                  return{
+                  return {
                     incoming: {
                       ...this.state.incoming,
-                      [portId]: data
-                    }
+                      [portId]: data,
+                    },
                   }
                 }))
               } else {
-                port.subscribe(data => this.setState((prevState, props) => {
+                port.subscribe(data => this.setState(() => {
                   log(`receive ${portId}`, data)
-                  return{
+                  return {
                     incoming: {
                       ...this.state.incoming,
-                      [portId]: data
-                    }
+                      [portId]: data,
+                    },
                   }
                 }))
               }
             } else if (port.send) {
               portsIn.push(portId)
-              this.setState((prevState, props) => ({
+              this.setState(() => ({
                 outgoing: {
                   ...this.state.outgoing,
                   [portId]: (...args) => {
                     log(`send ${portId}`, args)
                     port.send(...args)
-                  }
-                }
+                  },
+                },
               }))
             }
           })
@@ -105,9 +109,9 @@ export const appWithElm =
         if (this.state.ready) {
           return (
             <WrappedComponent
-            ports={this.state.ports}
-            incoming={this.state.incoming}
-            outgoing={this.state.outgoing}
+              ports={this.state.ports}
+              incoming={this.state.incoming}
+              outgoing={this.state.outgoing}
             />
           )
         }
@@ -115,3 +119,5 @@ export const appWithElm =
       }
     }
   }
+
+export default appWithElm
