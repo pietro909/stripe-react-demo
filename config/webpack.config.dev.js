@@ -87,6 +87,7 @@ module.exports = {
     noParse: /\.elm$/,
     // First, run the linter.
     // It's important to do this before Babel processes the JS.
+    /*
     preLoaders: [
       {
         test: /\.(js|jsx)$/,
@@ -94,6 +95,7 @@ module.exports = {
         include: paths.appSrc,
       }
     ],
+    */
     loaders: [
       // Elm sources
       {

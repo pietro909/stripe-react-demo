@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
-
 /* eslint-disable import/no-unresolved */
-import Elm from '../elm/Main'
+import innerElm from '../elm/Main'
 /* eslint-enable import/no-unresolved */
 
 const bootstrapElm = elmApp =>
@@ -45,7 +44,7 @@ const appWithElm =
           incoming: {},
           outgoing: {},
         }
-        const elmApp = Elm.ElmApp
+        const elmApp = innerElm.ElmApp
         bootstrapElm(elmApp).then(app => {
           const portsOut = []
           const portsIn = []

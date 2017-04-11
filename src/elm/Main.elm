@@ -10,6 +10,9 @@ import Messages exposing (..)
 import Form
 import Validation
 
+import SendFunctions exposing (addOne, functionToString)
+
+
 port statusMessages : StatusMessage -> Cmd msg
 port errors : String -> Cmd msg
 
@@ -23,6 +26,10 @@ port updateCustomer : (() -> msg) -> Sub msg
 port deleteCustomer : (() -> msg) -> Sub msg
 port selectCustomer : (String -> msg) -> Sub msg
 port updateList : (() -> msg) -> Sub msg
+
+
+type alias Selectors = { sel1: String }
+port selectors : Selectors -> Cmd msg
 
 type alias StatusMessage =
   { message : String
@@ -100,6 +107,9 @@ actionLogger f msg model =
   in
     f m model
 
+aSelector : Int -> String
+aSelector what = "heyyy"
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
@@ -111,13 +121,15 @@ update msg model =
             (StatusMessage "No API key found! check src/API.js and the README for more information." 3, Cmd.none)
           else
             (StatusMessage "Welcome to version 0.1" 1, Api.readAll config.apiKey)
+        sel = { sel1 = functionToString aSelector }
         cmd = Cmd.batch
           [ statusMessages message
           , started True
           , startCmd
+          , selectors sel
           ]
         newModel = { model | config = config }
-      in 
+      in
         (newModel, cmd)
 
     Customers (Err e) ->
