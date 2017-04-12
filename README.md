@@ -10,7 +10,7 @@ Additional libraries:
 
 This project template was built with [Create React App](https://github.com/facebookincubator/create-react-app), then ejected to customize Webpack's configuration.
 
-Using [Stripe API](https://stripe.com/docs/api#list_customers) for customers' management.
+Using [Stripe API](https://stripe.com/docs/api#list_customers) for customers' management.A
 
 ## Before running
 
@@ -27,7 +27,7 @@ $ npm install
 $ elm install
 ```
 
-## Available Scripts
+## Web
 
 In the project directory, you can run:
 
@@ -46,3 +46,15 @@ It correctly bundles React in production mode and optimizes the build for the be
 
 The build is minified and the filenames include the hashes.<br>
 Your app is ready to be deployed!
+
+## Mobile
+
+The application is exported using [Cordova](https://cordova.apache.org/).
+Please refer to its documentation to run it from the command line, for example:
+
+```
+$ cordova emulate ios --target="iPhone-6-Plus, 10.3"
+```
+
+
+
