@@ -1,10 +1,11 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import Input from './Input'
 
 const CustomerForm = ({
-  deleteCustomer,
   cleanFields,
   createCustomer,
+  deleteCustomer,
   model,
   onChange,
   updateCustomer,

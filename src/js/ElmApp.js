@@ -32,8 +32,6 @@ const appWithElm =
     const warn = debug ? genericLogger(console.warn) : noop
     /* eslint-enable no-console */
 
-    console.log('CHIAMA UNO!!!')
-
     return class extends Component {
       constructor(props) {
         super(props)

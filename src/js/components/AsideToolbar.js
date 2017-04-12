@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import CustomerForm from './CustomerForm'
 
 const AsideToolbar = ({
@@ -8,22 +9,17 @@ const AsideToolbar = ({
   unselectCustomer,
   updateCustomer,
   updateForm,
-}) => {
-  const handleSubmit = () => console.log('submit!')
-  return (
-    <aside className="col-sm-4">
-      <CustomerForm
-        cleanFields={unselectCustomer}
-        deleteCustomer={deleteCustomer}
-        model={selectedCustomer}
-        onSubmit={handleSubmit}
-        createCustomer={createCustomer}
-        onChange={updateForm}
-        updateCustomer={updateCustomer}
-      />
-    </aside>
-  )
-}
+}) =>
+  <aside className="col-sm-4">
+    <CustomerForm
+      cleanFields={unselectCustomer}
+      deleteCustomer={deleteCustomer}
+      model={selectedCustomer}
+      createCustomer={createCustomer}
+      onChange={updateForm}
+      updateCustomer={updateCustomer}
+    />
+  </aside>
 
 AsideToolbar.propTypes = {
   createCustomer: PropTypes.func.isRequired,

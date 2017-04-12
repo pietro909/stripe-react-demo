@@ -1,9 +1,42 @@
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import Header from './components/Header'
 import AsideToolbar from './components/AsideToolbar'
 import MainSection from './components/MainSection'
 
 import appWithElm from './ElmApp'
+
+function buildState({ incoming, outgoing }) {
+  if (!incoming || !outgoing) {
+    return {}
+  }
+  const {
+    createCustomer,
+    deleteCustomer,
+    selectCustomer,
+    updateCustomer,
+    updateForm,
+    updateList,
+  } = outgoing
+  const {
+    customers,
+    formUpdated,
+    statusMessages,
+  } = incoming
+  return {
+    customers: customers || [],
+    deleteCustomer,
+    formUpdated,
+    selectCustomer,
+    statusMessages,
+    updateCustomer,
+    updateFormField: updateForm ? (name, value) => updateForm([name, value]) : null,
+    updateList,
+    createCustomer,
+    statusMessage: statusMessages || {},
+    unselectCustomer: () => selectCustomer(''),
+  }
+}
 
 class TheApp extends Component {
   static propTypes = {
@@ -13,32 +46,11 @@ class TheApp extends Component {
 
   constructor(props) {
     super(props)
-    const {
-      createCustomer,
-      deleteCustomer,
-      selectCustomer,
-      updateCustomer,
-      updateForm,
-      updateList,
-    } = this.props.outgoing
-    const {
-      customers,
-      formUpdated,
-      statusMessages,
-    } = this.props.incoming
-    this.state = {
-      customers: customers || [],
-      deleteCustomer,
-      formUpdated,
-      selectCustomer,
-      statusMessages,
-      updateCustomer,
-      updateFormField: (name, value) => updateForm([name, value]),
-      updateList,
-      createCustomer,
-      statusMessage: statusMessages || {},
-      unselectCustomer: () => selectCustomer(''),
-    }
+    this.state = buildState(props)
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState(() => buildState(nextProps))
   }
 
   render() {
