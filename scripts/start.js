@@ -6,6 +6,9 @@ process.env.NODE_ENV = 'development';
 // https://github.com/motdotla/dotenv
 require('dotenv').config({silent: true});
 
+if (!process.env.REACT_APP_API_KEY) {
+  throw new Error("Cannot find REACT_APP_API_KEY. Please read the README.")
+}
 var chalk = require('chalk');
 var webpack = require('webpack');
 var WebpackDevServer = require('webpack-dev-server');

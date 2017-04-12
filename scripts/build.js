@@ -5,7 +5,11 @@ process.env.NODE_ENV = 'production';
 // if this file is missing. dotenv will never modify any environment variables
 // that have already been set.
 // https://github.com/motdotla/dotenv
-require('dotenv').config({silent: true});
+require('dotenv').config({silent: false});
+
+if (!process.env.REACT_APP_API_KEY) {
+  throw new Error("Cannot find REACT_APP_API_KEY. Please read the README.")
+}
 
 var chalk = require('chalk');
 var fs = require('fs-extra');

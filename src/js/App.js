@@ -82,10 +82,6 @@ const options = {
   debug: true,
 }
 
-if (!process.env.REACT_APP_API_KEY) {
-  throw new Error('Cannot find REACT_APP_API_KEY. Please read the README.')
-}
-
 const App = appWithElm(options)(TheApp)
 
 export default App
