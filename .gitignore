@@ -7,3 +7,5 @@ elm-stuff/
 start.sh
 .DS_Store
 www/
+platforms/
+plugins/
