@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 
 /* eslint-disable import/no-unresolved */
 /* eslint-disable import/extensions */
-import Elm from '../elm/Main'
+import Elm from '../../elm/Main'
 /* eslint-enable import/no-unresolved */
 
 const bootstrapElm = elmApp =>

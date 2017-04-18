@@ -1,10 +1,36 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import {
+  BrowserRouter as Router,
+  Route,
+  Redirect,
+  Link,
+  withRouter,
+  HashRouter,
+} from 'react-router-dom'
+//import { withRouter } from 'react-router'
+
+class Appa extends Component {
+  static propTypes = {
+    match: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
+    history: PropTypes.object.isRequired,
+  }
+
+  render() {
+    console.log(`yay`)
+    return <App />
+  }
+}
+
+
+
 import Header from './components/Header'
 import AsideToolbar from './components/AsideToolbar'
 import MainSection from './components/MainSection'
 
-import appWithElm from './ElmApp'
+import appWithElm from './framework/ElmApp'
+import routerComponentFactory from './framework/routerComponent'
 
 function buildState({ incoming, outgoing }) {
   if (!incoming || !outgoing) {
@@ -14,6 +40,7 @@ function buildState({ incoming, outgoing }) {
     createCustomer,
     deleteCustomer,
     selectCustomer,
+    setRoute,
     updateCustomer,
     updateForm,
     updateList,
@@ -21,27 +48,41 @@ function buildState({ incoming, outgoing }) {
   const {
     customers,
     formUpdated,
+    navigateTo,
     statusMessages,
   } = incoming
   return {
+    createCustomer,
     customers: customers || [],
     deleteCustomer,
     formUpdated,
+    navigateTo,
     selectCustomer,
+    setRoute: setRoute,
+    statusMessage: statusMessages || {},
     statusMessages,
+    unselectCustomer: () => selectCustomer(''),
     updateCustomer,
     updateFormField: updateForm ? (name, value) => updateForm([name, value]) : null,
     updateList,
-    createCustomer,
-    statusMessage: statusMessages || {},
-    unselectCustomer: () => selectCustomer(''),
   }
 }
+
+const routerComponent =
+  (Component, props) => routerProps => {
+
+    <Component {...props} {...routerProps} />
+  }
 
 class TheApp extends Component {
   static propTypes = {
     incoming: PropTypes.object.isRequired,
     outgoing: PropTypes.object.isRequired,
+    /*
+    match: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
+    history: PropTypes.object.isRequired,
+    */
   }
 
   constructor(props) {
@@ -50,7 +91,8 @@ class TheApp extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState(() => buildState(nextProps))
+    const nextState = buildState(nextProps)
+    this.setState(() => nextState)
   }
 
   render() {
@@ -60,29 +102,65 @@ class TheApp extends Component {
       deleteCustomer,
       formUpdated,
       selectCustomer,
+      setRoute,
       statusMessage,
       unselectCustomer,
       updateCustomer,
       updateFormField,
+      navigateTo,
     } = this.state
+    const routerComponent = routerComponentFactory(setRoute)
+
+    console.log(`navigateTo: ${navigateTo}`)
     return (
-      <article>
-        <Header message={statusMessage.message} level={statusMessage.level} />
-        <div className="row">
-          <AsideToolbar
-            createCustomer={createCustomer}
-            deleteCustomer={deleteCustomer}
-            selectedCustomer={formUpdated}
-            unselectCustomer={unselectCustomer}
-            updateCustomer={updateCustomer}
-            updateForm={updateFormField}
-          />
-          <MainSection
-            customers={customers}
-            selectCustomer={selectCustomer}
-          />
-        </div>
-      </article>
+      <Router onChange>
+        <article>
+          <ul>
+            <li><Link to="/">List</Link></li>
+            <li><Link to="/edit/1234">Form</Link></li>
+          </ul>
+
+          <Header message={statusMessage.message} level={statusMessage.level} />
+          <div className="row">
+
+            <Route
+              path="/edit/:id"
+              component={ props => {
+                const { id } = props.match.params
+                if (navigateTo) {
+                  return <Redirect to="/404"/>
+                }
+                if (id !== formUpdated.fields.id.value) {
+                  selectCustomer(id)
+                  return <h2>No customer {id}</h2>
+                }
+                return <AsideToolbar
+                  createCustomer={createCustomer}
+                  deleteCustomer={deleteCustomer}
+                  selectedCustomer={formUpdated}
+                  unselectCustomer={unselectCustomer}
+                  updateCustomer={updateCustomer}
+                  updateForm={updateFormField}
+                  {...props}
+                />
+              }}
+              onEnter={() => { console.log('FUCK') }}
+            />
+
+            <Route
+              exact
+              path="/"
+              component={routerComponent(MainSection, {customers, selectCustomer})}
+            />
+
+            <Route
+              path="/404"
+              component={ props => <h1>404 Not found</h1> }
+            />
+
+          </div>
+        </article>
+      </Router>
     )
   }
 }
@@ -96,4 +174,27 @@ const options = {
 
 const App = appWithElm(options)(TheApp)
 
-export default App
+// A simple component that shows the pathname of the current location
+class ShowTheLocation extends React.Component {
+  static propTypes = {
+    match: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
+    history: PropTypes.object.isRequired
+  }
+
+  render() {
+    const { match, location, history } = this.props
+
+    return (
+      <HashRouter>
+      <div>You are now at {location.pathname}</div>
+      </HashRouter>
+    )
+  }
+}
+
+// Create a new component that is "connected" (to borrow redux
+// terminology) to the router.
+const ShowTheLocationWithRouter = withRouter(ShowTheLocation)
+
+export default ShowTheLocationWithRouter

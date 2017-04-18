@@ -15,3 +15,9 @@ emptyCustomer =
 type alias Config =
   { apiKey : String }
 
+type alias Router =
+  { path: String }
+
+  {--
+  { match = {"path":"/","url":"/","isExact":true,"params":{}},"location":{"pathname":"/","search":"","hash":""},"history":{"length":3,"action":"POP","location":{"pathname":"/","search":"","hash":""}}}
+  --}

@@ -16,6 +16,7 @@ port errors : String -> Cmd msg
 port customers : List Customer -> Cmd msg
 port customerInTheEditor : Customer -> Cmd msg
 port started : Bool -> Cmd msg
+port navigateTo : String -> Cmd msg
 
 port start : (Config -> msg) -> Sub msg
 port createCustomer : (() -> msg) -> Sub msg
@@ -23,6 +24,7 @@ port updateCustomer : (() -> msg) -> Sub msg
 port deleteCustomer : (() -> msg) -> Sub msg
 port selectCustomer : (String -> msg) -> Sub msg
 port updateList : (() -> msg) -> Sub msg
+port setRoute : (String -> msg) -> Sub msg
 
 type alias StatusMessage =
   { message : String
@@ -34,20 +36,22 @@ type alias Model =
   , customerInTheEditor : Customer
   , config : Config
   , form : Form.Model
+  , router : Router
   }
 
 initialModel : Model
 initialModel =
   { customers = []
-  , customerInTheEditor = emptyCustomer 
+  , customerInTheEditor = emptyCustomer
   , config = Config ""
   , form = Form.initialModel
+  , router = { path = "/" }
   }
 
 -- takes an error msg, create a command to send it outside
 errorHub : List String -> List (Cmd Msg)
 errorHub errList =
-  List.map errors errList 
+  List.map errors errList
 
 initialCommand : Cmd Msg
 initialCommand = Cmd.map FormMessage Form.initialCommand
@@ -80,11 +84,11 @@ formToCustomer form =
       (Ok b, Ok d, Ok e, Ok fn, Ok i, Ok ln) ->
         Customer b d e fn i ln
           |> Ok
-      _ -> 
+      _ ->
         filterErrors [description, email, firstName, id, lastName] ++
         filterErrors [balance]
           |> Err
-                
+
 filterErrors list =
   List.filterMap
     (\r ->
@@ -106,7 +110,7 @@ update msg model =
 
     Start config ->
       let
-        (message, startCmd) = 
+        (message, startCmd) =
           if (String.isEmpty config.apiKey) then
             (StatusMessage "No API key found! check src/API.js and the README for more information." 3, Cmd.none)
           else
@@ -117,7 +121,7 @@ update msg model =
           , startCmd
           ]
         newModel = { model | config = config }
-      in 
+      in
         (newModel, cmd)
 
     Customers (Err e) ->
@@ -129,7 +133,8 @@ update msg model =
       let
         newModel = { model | customers = list }
         customersCmd = customers list
-        infoCmd = statusMessages <| StatusMessage ("Read " ++ (toString <| List.length list) ++ " customers.") 1
+        infoCmd = statusMessages
+            <| StatusMessage ("Read " ++ (toString <| List.length list) ++ " customers.") 1
         cmd = Cmd.batch [ infoCmd, customersCmd ]
       in
         ( newModel, cmd )
@@ -186,7 +191,7 @@ update msg model =
             Just customer ->
               let
                 form = Form.fromCustomer customer
-                newModel = { model | form = form }
+                newModel = Debug.log "just" { model | form = form }
                 formCmd =
                   Form.encodeModel form
                     |> Form.formUpdated
@@ -201,16 +206,18 @@ update msg model =
               let
                 newModel =
                   { model | form = Form.initialModel }
-                cmd = 
+                cmd =
                   Form.encodeModel newModel.form
                     |> Form.formUpdated
                     |> Cmd.map FormMessage
+                navigationCmd =
+                  navigateTo "404"
               in
-                ( newModel, cmd )
+                ( newModel, Cmd.batch [ cmd, navigationCmd ])
       in
         (newModel, cmd)
     UpdateList ->
-      let 
+      let
         readCmd = Api.readAll model.config.apiKey
         infoCmd = statusMessages <| StatusMessage "Fetching customers..." 2
         cmd = Cmd.batch [ infoCmd, readCmd ]
@@ -222,6 +229,7 @@ update msg model =
       ( model, Api.readAll model.config.apiKey )
     CustomerUpdated customer ->
       ( model, Api.readAll model.config.apiKey )
+
     FormMessage msg ->
       let
         (form, formCmd) = Form.update msg model.form
@@ -230,15 +238,28 @@ update msg model =
       in
         (newModel, cmd)
 
+    SetRoute path ->
+      -- TODO: just tracking the route's change here
+      let
+        router = updateRouter model.router path
+        newModel = { model | router = router }
+      in
+        (newModel, Cmd.none)
+
+updateRouter : Router -> String -> Router
+updateRouter router path =
+  { path = path }
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.batch
     [ createCustomer (\_ -> CreateCustomer)
-    , deleteCustomer (\_ -> DeleteCustomer) 
+    , deleteCustomer (\_ -> DeleteCustomer)
     , updateCustomer (\_ -> UpdateCustomer)
     , selectCustomer SelectCustomer
     , updateList (\_ -> UpdateList)
     , start Start
+    , setRoute SetRoute
     , Sub.map FormMessage (Form.subscriptions model.form)
     ]
 
