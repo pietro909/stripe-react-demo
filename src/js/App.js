@@ -5,25 +5,8 @@ import {
   Route,
   Redirect,
   Link,
-  withRouter,
-  HashRouter,
 } from 'react-router-dom'
-//import { withRouter } from 'react-router'
-
-class Appa extends Component {
-  static propTypes = {
-    match: PropTypes.object.isRequired,
-    location: PropTypes.object.isRequired,
-    history: PropTypes.object.isRequired,
-  }
-
-  render() {
-    console.log(`yay`)
-    return <App />
-  }
-}
-
-
+import { withRouter } from 'react-router'
 
 import Header from './components/Header'
 import AsideToolbar from './components/AsideToolbar'
@@ -31,58 +14,15 @@ import MainSection from './components/MainSection'
 
 import appWithElm from './framework/ElmApp'
 import routerComponentFactory from './framework/routerComponent'
-
-function buildState({ incoming, outgoing }) {
-  if (!incoming || !outgoing) {
-    return {}
-  }
-  const {
-    createCustomer,
-    deleteCustomer,
-    selectCustomer,
-    setRoute,
-    updateCustomer,
-    updateForm,
-    updateList,
-  } = outgoing
-  const {
-    customers,
-    formUpdated,
-    navigateTo,
-    statusMessages,
-  } = incoming
-  return {
-    createCustomer,
-    customers: customers || [],
-    deleteCustomer,
-    formUpdated,
-    navigateTo,
-    selectCustomer,
-    setRoute: setRoute,
-    statusMessage: statusMessages || {},
-    statusMessages,
-    unselectCustomer: () => selectCustomer(''),
-    updateCustomer,
-    updateFormField: updateForm ? (name, value) => updateForm([name, value]) : null,
-    updateList,
-  }
-}
-
-const routerComponent =
-  (Component, props) => routerProps => {
-
-    <Component {...props} {...routerProps} />
-  }
+import { buildState } from './framework/appState'
 
 class TheApp extends Component {
   static propTypes = {
     incoming: PropTypes.object.isRequired,
     outgoing: PropTypes.object.isRequired,
-    /*
     match: PropTypes.object.isRequired,
     location: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired,
-    */
   }
 
   constructor(props) {
@@ -127,13 +67,15 @@ class TheApp extends Component {
               path="/edit/:id"
               component={ props => {
                 const { id } = props.match.params
+                /*
                 if (navigateTo) {
-                  return <Redirect to="/404"/>
+                  return <Redirect to={navigateTo}/>
                 }
                 if (id !== formUpdated.fields.id.value) {
                   selectCustomer(id)
                   return <h2>No customer {id}</h2>
                 }
+                */
                 return <AsideToolbar
                   createCustomer={createCustomer}
                   deleteCustomer={deleteCustomer}
@@ -144,7 +86,7 @@ class TheApp extends Component {
                   {...props}
                 />
               }}
-              onEnter={() => { console.log('FUCK') }}
+              onEnter={() => { console.log('on enter fired!') }}
             />
 
             <Route
@@ -157,6 +99,8 @@ class TheApp extends Component {
               path="/404"
               component={ props => <h1>404 Not found</h1> }
             />
+
+            <Redirect to={navigateTo}/>
 
           </div>
         </article>
@@ -172,29 +116,11 @@ const options = {
   debug: true,
 }
 
-const App = appWithElm(options)(TheApp)
+const App = appWithElm(options)(withRouter(TheApp))
 
-// A simple component that shows the pathname of the current location
-class ShowTheLocation extends React.Component {
-  static propTypes = {
-    match: PropTypes.object.isRequired,
-    location: PropTypes.object.isRequired,
-    history: PropTypes.object.isRequired
-  }
+const wrapped = () =>
+  <Router>
+    <App/>
+  </Router>
 
-  render() {
-    const { match, location, history } = this.props
-
-    return (
-      <HashRouter>
-      <div>You are now at {location.pathname}</div>
-      </HashRouter>
-    )
-  }
-}
-
-// Create a new component that is "connected" (to borrow redux
-// terminology) to the router.
-const ShowTheLocationWithRouter = withRouter(ShowTheLocation)
-
-export default ShowTheLocationWithRouter
+export default wrapped

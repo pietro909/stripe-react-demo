@@ -197,8 +197,12 @@ update msg model =
                     |> Form.formUpdated
                     |> Cmd.map FormMessage
                 message = statusMessages <| StatusMessage ("Selected #" ++ customer.id) 1
+                navigationCmd =
+                  navigateTo ("/edit/"++customer.id)
+
+                -- TODO: doesn't work
                 cmd = Cmd.batch
-                  [ formCmd, message ]
+                  [ formCmd, message, navigationCmd ]
               in
                 (newModel, cmd)
 
@@ -211,7 +215,7 @@ update msg model =
                     |> Form.formUpdated
                     |> Cmd.map FormMessage
                 navigationCmd =
-                  navigateTo "404"
+                  navigateTo "/404"
               in
                 ( newModel, Cmd.batch [ cmd, navigationCmd ])
       in
