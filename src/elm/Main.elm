@@ -10,10 +10,12 @@ import Messages exposing (..)
 import Form
 import Validation
 
+-- modularization
+import ListOfCustomers as Loc
+
 port statusMessages : StatusMessage -> Cmd msg
 port errors : String -> Cmd msg
 
-port customers : List Customer -> Cmd msg
 port customerInTheEditor : Customer -> Cmd msg
 port started : Bool -> Cmd msg
 port navigateTo : String -> Cmd msg
@@ -23,7 +25,6 @@ port createCustomer : (() -> msg) -> Sub msg
 port updateCustomer : (() -> msg) -> Sub msg
 port deleteCustomer : (() -> msg) -> Sub msg
 port selectCustomer : (String -> msg) -> Sub msg
-port updateList : (() -> msg) -> Sub msg
 port setRoute : (String -> msg) -> Sub msg
 
 type alias StatusMessage =
@@ -32,7 +33,7 @@ type alias StatusMessage =
   }
 
 type alias Model =
-  { customers : List Customer
+  { listOfCustomers : Loc.Model
   , customerInTheEditor : Customer
   , config : Config
   , form : Form.Model
@@ -59,10 +60,6 @@ initialCommand = Cmd.map FormMessage Form.initialCommand
 init : (Model, Cmd Msg)
 init =
   ( initialModel, initialCommand )
-
-type CumulativeResult a
-  = Y a
-  | N (List String)
 
 getFieldValue name extractor fields =
   Dict.get name fields
@@ -124,20 +121,6 @@ update msg model =
       in
         (newModel, cmd)
 
-    Customers (Err e) ->
-      let
-        infoCmd = statusMessages <| StatusMessage (errorExtractor e) 3
-      in
-        (model, infoCmd)
-    Customers (Ok list) ->
-      let
-        newModel = { model | customers = list }
-        customersCmd = customers list
-        infoCmd = statusMessages
-            <| StatusMessage ("Read " ++ (toString <| List.length list) ++ " customers.") 1
-        cmd = Cmd.batch [ infoCmd, customersCmd ]
-      in
-        ( newModel, cmd )
 
     CreateCustomer ->
       let
@@ -220,13 +203,7 @@ update msg model =
                 ( newModel, Cmd.batch [ cmd, navigationCmd ])
       in
         (newModel, cmd)
-    UpdateList ->
-      let
-        readCmd = Api.readAll model.config.apiKey
-        infoCmd = statusMessages <| StatusMessage "Fetching customers..." 2
-        cmd = Cmd.batch [ infoCmd, readCmd ]
-      in
-        ( model, cmd)
+
     CustomerCreated id ->
       ( model, Api.readAll model.config.apiKey )
     CustomerDeleted id ->
