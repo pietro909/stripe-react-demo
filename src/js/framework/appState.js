@@ -14,7 +14,7 @@ export function buildState({ incoming, outgoing }) {
   const {
     customers,
     formUpdated,
-    navigateTo,
+    destination,
     statusMessages,
   } = incoming
   return {
@@ -22,7 +22,7 @@ export function buildState({ incoming, outgoing }) {
     customers: customers || [],
     deleteCustomer,
     formUpdated,
-    navigateTo,
+    destination,
     selectCustomer,
     setRoute: setRoute,
     statusMessage: statusMessages || {},

@@ -18,6 +18,11 @@ type alias Config =
 type alias Router =
   { path: String }
 
+type alias Destination =
+  { path: String
+  , component: String
+  }
+
   {--
   { match = {"path":"/","url":"/","isExact":true,"params":{}},"location":{"pathname":"/","search":"","hash":""},"history":{"length":3,"action":"POP","location":{"pathname":"/","search":"","hash":""}}}
   --}
