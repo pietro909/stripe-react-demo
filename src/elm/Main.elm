@@ -3,7 +3,9 @@ port module ElmApp exposing (main)
 
 import Dict
 import List.Extra as Lx
+import Navigation
 import Platform
+
 
 import CustomersList.CustomersList as CustomersList
 import CustomersList.Ports as CustomersListPorts
@@ -13,6 +15,7 @@ import Form.Ports as FormPorts
 import Form.Types as FormTypes
 import Form.Validation as Validation
 import Native.ExportFunction
+import Router.NavigationProgram
 import Router.Ports as RouterPorts
 
 import Api exposing (..)
@@ -68,8 +71,8 @@ errorHub errList =
 initialCommand : Cmd Msg
 initialCommand = Cmd.map FormMsg Form.initialCommand
 
-init : (Model, Cmd Msg)
-init =
+init : Navigation.Location -> ( Model, Cmd Msg )
+init location =
   ( initialModel, initialCommand )
 
 getFieldValue name extractor fields =
@@ -262,6 +265,9 @@ update msg model =
       in
         (newModel, Cmd.none)
 
+    UrlChange location ->
+      (model, Cmd.none)
+
 updateRouter : Router -> String -> Router
 updateRouter router path =
   { path = path }
@@ -280,9 +286,10 @@ subscriptions model =
     , Sub.map FormMsg (Form.subscriptions model.form)
     ]
 
+
 main : Program Never Model Msg
 main =
-  Platform.program
+  NavigationProgram.headlessProgram UrlChange
     { init = init
     , update = update --actionLogger update
     , subscriptions = subscriptions

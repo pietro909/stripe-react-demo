@@ -1,6 +1,7 @@
 module Messages exposing (..)
 
 import Http
+import Navigation
 
 import Models exposing (..)
 import Form.Types as FormTypes
@@ -18,3 +19,4 @@ type Msg
   | SetRoute String
   | Start Config
   | UpdateCustomer
+  | UrlChange Navigation.Location
