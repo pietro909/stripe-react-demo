@@ -6,7 +6,7 @@ import AsideToolbar from './components/AsideToolbar'
 import MainSection from './components/MainSection'
 
 import appWithElm from './framework/ElmApp'
-import { buildState } from './framework/appState'
+import { buildState, expectedPorts } from './framework/appState'
 
 class TheApp extends Component {
   static propTypes = {
@@ -37,30 +37,28 @@ class TheApp extends Component {
       updateFormField,
       destination,
     } = this.state
-
-    console.log(`destination: ${destination.path} ${destination.component}`)
+    const { component } = destination
 
     return (
         <article>
           <ul>
-            <li><Link to="/">List</Link></li>
-            <li><Link to="/edit/1234">Form</Link></li>
+            <li><a href="/">List</a></li>
+            <li><a href="/edit/1234">Form</a></li>
           </ul>
 
           <Header message={statusMessage.message} level={statusMessage.level} />
 
           <div className="row">
 
-            { switch(destination.component) {
 
-                case 'List':
+            { component === 'List' &&
                   <MainSection
                     customers={customers}
                     selectCustomer={selectCustomer}
                   />
-                  break
+            }
 
-                case 'Form':
+            { component === 'Form' &&
                   <AsideToolbar
                     createCustomer={createCustomer}
                     deleteCustomer={deleteCustomer}
@@ -69,15 +67,11 @@ class TheApp extends Component {
                     updateCustomer={updateCustomer}
                     updateForm={updateFormField}
                   />
-                  break
+            }
 
-                case 'NotFound':
+            { component === 'NotFound' &&
                   <h1>404 Not found</h1>
-                  break
-
-                default:
-                  throw new Error(`Component ${destination.component}`)
-            }}
+            }
 
           </div>
         </article>
@@ -90,6 +84,7 @@ const options = {
     apiKey: process.env.REACT_APP_API_KEY,
   },
   debug: true,
+  expectedPorts,
 }
 
 const App = appWithElm(options)(TheApp)
