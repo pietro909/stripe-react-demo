@@ -1,4 +1,11 @@
-module Api exposing (create, update, delete, readAll, errorExtractor)
+module Api exposing (
+  baseUrl,
+  create,
+  customersDecoder,
+  delete,
+  errorExtractor,
+  makeRequest,
+  update)
 
 import Http exposing (..)
 import Json.Encode
@@ -93,9 +100,4 @@ delete token customer =
     |> makeRequest token "delete" (urlWithId customer.id) Http.emptyBody
     |> Http.send CustomerDeleted
 
-readAll : String -> Cmd Msg
-readAll token =
-  customersDecoder
-    |> makeRequest token "get" baseUrl Http.emptyBody
-    |> Http.send Customers
 

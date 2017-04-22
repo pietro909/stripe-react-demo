@@ -4,17 +4,17 @@ import Http
 
 import Models exposing (..)
 import Form.Types as FormTypes
+import CustomersList.Types as CustomersListTypes
 
 type Msg
-  = Customers (Result Http.Error (List Customer))
-  | CreateCustomer
+  = CreateCustomer
   | CustomerCreated (Result Http.Error Customer)
   | CustomerDeleted (Result Http.Error String)
   | CustomerUpdated (Result Http.Error Customer)
+  | CustomersListMsg CustomersListTypes.Msg
   | DeleteCustomer
-  | SelectCustomer String
-  | UpdateCustomer
-  | UpdateList
-  | Start Config
-  | SetRoute String
   | FormMsg FormTypes.Msg
+  | SelectCustomer String
+  | SetRoute String
+  | Start Config
+  | UpdateCustomer

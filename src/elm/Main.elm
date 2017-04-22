@@ -5,12 +5,15 @@ import Dict
 import List.Extra as Lx
 import Platform
 
+import CustomersList.CustomersList as CustomersList
+import CustomersList.Ports as CustomersListPorts
+import CustomersList.Types as CustomersListTypes
 import Form.Form as Form
 import Form.Ports as FormPorts
-import Form.Types
 import Form.Types as FormTypes
 import Form.Validation as Validation
 import Native.ExportFunction
+import Router.Ports as RouterPorts
 
 import Api exposing (..)
 import Messages exposing (..)
@@ -20,7 +23,6 @@ import Models exposing (..)
 port statusMessages : StatusMessage -> Cmd msg
 port errors : String -> Cmd msg
 
-port customers : List Customer -> Cmd msg
 port customerInTheEditor : Customer -> Cmd msg
 port started : Bool -> Cmd msg
 port navigateTo : String -> Cmd msg
@@ -32,7 +34,6 @@ port createCustomer : (() -> msg) -> Sub msg
 port updateCustomer : (() -> msg) -> Sub msg
 port deleteCustomer : (() -> msg) -> Sub msg
 port selectCustomer : (String -> msg) -> Sub msg
-port updateList : (() -> msg) -> Sub msg
 port setRoute : (String -> msg) -> Sub msg
 
 
@@ -42,7 +43,7 @@ type alias StatusMessage =
   }
 
 type alias Model =
-  { customers : List Customer
+  { customersList : CustomersListTypes.Model
   , customerInTheEditor : Customer
   , config : Config
   , form : FormTypes.Model
@@ -52,7 +53,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-  { customers = []
+  { customersList = CustomersList.initialModel
   , customerInTheEditor = emptyCustomer
   , config = Config ""
   , form = Form.initialModel
@@ -121,30 +122,19 @@ update msg model =
           if (String.isEmpty config.apiKey) then
             (StatusMessage "No API key found! check src/API.js and the README for more information." 3, Cmd.none)
           else
-            (StatusMessage "Welcome to version 0.1" 1, Api.readAll config.apiKey)
+            ( StatusMessage "Welcome to version 0.1" 1
+            , Cmd.map CustomersListMsg <| CustomersList.fetchAll config.apiKey
+            )
         cmd = Cmd.batch
           [ statusMessages message
           , started True
+          , RouterPorts.destination { path = "/", component = "List" }
           , startCmd
           ]
         newModel = { model | config = config }
       in
         (newModel, cmd)
 
-    Customers (Err e) ->
-      let
-        infoCmd = statusMessages <| StatusMessage (errorExtractor e) 3
-      in
-        (model, infoCmd)
-    Customers (Ok list) ->
-      let
-        newModel = { model | customers = list }
-        customersCmd = customers list
-        infoCmd = statusMessages
-            <| StatusMessage ("Read " ++ (toString <| List.length list) ++ " customers.") 1
-        cmd = Cmd.batch [ infoCmd, customersCmd ]
-      in
-        ( newModel, cmd )
 
     CreateCustomer ->
       let
@@ -192,7 +182,7 @@ update msg model =
 
     SelectCustomer id ->
       let
-        maybeCustomer = Lx.find (\c -> c.id == id) model.customers
+        maybeCustomer = CustomersList.findById id model.customersList
         (newModel, cmd) =
           case maybeCustomer of
             Just customer ->
@@ -227,25 +217,40 @@ update msg model =
                 ( newModel, Cmd.batch [ cmd, navigationCmd ])
       in
         (newModel, cmd)
-    UpdateList ->
-      let
-        readCmd = Api.readAll model.config.apiKey
-        infoCmd = statusMessages <| StatusMessage "Fetching customers..." 2
-        cmd = Cmd.batch [ infoCmd, readCmd ]
-      in
-        ( model, cmd)
     CustomerCreated id ->
-      ( model, Api.readAll model.config.apiKey )
+      let
+        subCmd = CustomersList.fetchAll model.config.apiKey
+        cmd = Cmd.map CustomersListMsg subCmd
+      in
+        (model, cmd)
     CustomerDeleted id ->
-      ( model, Api.readAll model.config.apiKey )
+      let
+        subCmd = CustomersList.fetchAll model.config.apiKey
+        cmd = Cmd.map CustomersListMsg subCmd
+      in
+        (model, cmd)
     CustomerUpdated customer ->
-      ( model, Api.readAll model.config.apiKey )
+      let
+        subCmd = CustomersList.fetchAll model.config.apiKey
+        cmd = Cmd.map CustomersListMsg subCmd
+      in
+        (model, cmd)
+
+    CustomersListMsg msg ->
+      let
+        (subModel, subCmd) =
+          CustomersList.update model.config msg model.customersList
+        newModel = { model | customersList = subModel }
+        cmd = Cmd.map CustomersListMsg subCmd
+      in
+        (newModel, cmd)
+
 
     FormMsg msg ->
       let
-        (form, formCmd) = Form.update msg model.form
-        newModel = { model | form = form }
-        cmd = Cmd.map FormMsg formCmd
+        (subModel, subCmd) = Form.update msg model.form
+        newModel = { model | form = subModel }
+        cmd = Cmd.map FormMsg subCmd
       in
         (newModel, cmd)
 
@@ -268,9 +273,10 @@ subscriptions model =
     , deleteCustomer (\_ -> DeleteCustomer)
     , updateCustomer (\_ -> UpdateCustomer)
     , selectCustomer SelectCustomer
-    , updateList (\_ -> UpdateList)
     , start Start
     , setRoute SetRoute
+    , Sub.map CustomersListMsg
+        <| CustomersList.subscriptions model.customersList
     , Sub.map FormMsg (Form.subscriptions model.form)
     ]
 

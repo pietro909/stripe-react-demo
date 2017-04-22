@@ -6,7 +6,7 @@ import Json.Encode as JEnc
 
 import Models exposing (Customer, emptyCustomer)
 
-import Form.Ports exposing (..)
+import Form.Ports as Ports
 import Form.Types exposing (..)
 import Form.Validation exposing (..)
 
@@ -53,7 +53,7 @@ fromCustomer customer =
   }
 
 initialCommand =
-  formUpdated (encodeModel initialModel)
+  Ports.formUpdated (encodeModel initialModel)
 
 valueToField : String -> Maybe FormField -> Maybe FormField
 valueToField value maybeField =
@@ -77,12 +77,11 @@ update msg model =
       let
         newModel = updateFormField name value model
       in
-        (newModel, formUpdated (encodeModel newModel))
+        (newModel, Ports.formUpdated (encodeModel newModel))
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.batch
-    [ updateForm UpdateFormField ]
+  Ports.updateForm UpdateFormField
 
 fieldValueToJson : FieldType -> JEnc.Value
 fieldValueToJson value =
