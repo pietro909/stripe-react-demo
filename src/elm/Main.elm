@@ -1,14 +1,21 @@
 port module ElmApp exposing (main)
 
-import Platform
-import List.Extra as Lx
+
 import Dict
+import List.Extra as Lx
+import Platform
+
+import Form.Form as Form
+import Form.Ports as FormPorts
+import Form.Types
+import Form.Types as FormTypes
+import Form.Validation as Validation
+import Native.ExportFunction
 
 import Api exposing (..)
-import Models exposing (..)
 import Messages exposing (..)
-import Form
-import Validation
+import Models exposing (..)
+
 
 port statusMessages : StatusMessage -> Cmd msg
 port errors : String -> Cmd msg
@@ -17,6 +24,8 @@ port customers : List Customer -> Cmd msg
 port customerInTheEditor : Customer -> Cmd msg
 port started : Bool -> Cmd msg
 port navigateTo : String -> Cmd msg
+port selectors : List String -> Cmd msg
+--port state : Model -> Cmd msg
 
 port start : (Config -> msg) -> Sub msg
 port createCustomer : (() -> msg) -> Sub msg
@@ -25,6 +34,7 @@ port deleteCustomer : (() -> msg) -> Sub msg
 port selectCustomer : (String -> msg) -> Sub msg
 port updateList : (() -> msg) -> Sub msg
 port setRoute : (String -> msg) -> Sub msg
+
 
 type alias StatusMessage =
   { message : String
@@ -35,9 +45,10 @@ type alias Model =
   { customers : List Customer
   , customerInTheEditor : Customer
   , config : Config
-  , form : Form.Model
+  , form : FormTypes.Model
   , router : Router
   }
+
 
 initialModel : Model
 initialModel =
@@ -54,15 +65,11 @@ errorHub errList =
   List.map errors errList
 
 initialCommand : Cmd Msg
-initialCommand = Cmd.map FormMessage Form.initialCommand
+initialCommand = Cmd.map FormMsg Form.initialCommand
 
 init : (Model, Cmd Msg)
 init =
   ( initialModel, initialCommand )
-
-type CumulativeResult a
-  = Y a
-  | N (List String)
 
 getFieldValue name extractor fields =
   Dict.get name fields
@@ -70,7 +77,7 @@ getFieldValue name extractor fields =
     |> Result.andThen (\f -> extractor f.value)
     |> Result.mapError (\e -> Debug.log name e)
 
-formToCustomer : Form.Model -> Result (List Validation.ConversionError) Customer
+formToCustomer : FormTypes.Model -> Result (List Validation.ConversionError) Customer
 formToCustomer form =
   let
     balance = getFieldValue "balance" Validation.unboxFloat form.fields
@@ -194,8 +201,8 @@ update msg model =
                 newModel = Debug.log "just" { model | form = form }
                 formCmd =
                   Form.encodeModel form
-                    |> Form.formUpdated
-                    |> Cmd.map FormMessage
+                    |> FormPorts.formUpdated
+                    |> Cmd.map FormMsg
                 message = statusMessages <| StatusMessage ("Selected #" ++ customer.id) 1
                 navigationCmd =
                   navigateTo ("/edit/"++customer.id)
@@ -212,8 +219,8 @@ update msg model =
                   { model | form = Form.initialModel }
                 cmd =
                   Form.encodeModel newModel.form
-                    |> Form.formUpdated
-                    |> Cmd.map FormMessage
+                    |> FormPorts.formUpdated
+                    |> Cmd.map FormMsg
                 navigationCmd =
                   navigateTo "/404"
               in
@@ -234,11 +241,11 @@ update msg model =
     CustomerUpdated customer ->
       ( model, Api.readAll model.config.apiKey )
 
-    FormMessage msg ->
+    FormMsg msg ->
       let
         (form, formCmd) = Form.update msg model.form
         newModel = { model | form = form }
-        cmd = Cmd.map FormMessage formCmd
+        cmd = Cmd.map FormMsg formCmd
       in
         (newModel, cmd)
 
@@ -264,7 +271,7 @@ subscriptions model =
     , updateList (\_ -> UpdateList)
     , start Start
     , setRoute SetRoute
-    , Sub.map FormMessage (Form.subscriptions model.form)
+    , Sub.map FormMsg (Form.subscriptions model.form)
     ]
 
 main : Program Never Model Msg

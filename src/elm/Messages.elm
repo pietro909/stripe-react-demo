@@ -3,7 +3,7 @@ module Messages exposing (..)
 import Http
 
 import Models exposing (..)
-import Form
+import Form.Types as FormTypes
 
 type Msg
   = Customers (Result Http.Error (List Customer))
@@ -15,6 +15,6 @@ type Msg
   | SelectCustomer String
   | UpdateCustomer
   | UpdateList
-  | FormMessage Form.Msg
   | Start Config
   | SetRoute String
+  | FormMsg FormTypes.Msg

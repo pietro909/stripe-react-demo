@@ -1,33 +1,24 @@
-port module Form exposing (..)
+port module Form.Form exposing (..)
+
 
 import Dict exposing (Dict)
 import Json.Encode as JEnc
 
-import Validation exposing (..)
 import Models exposing (Customer, emptyCustomer)
 
-type alias FormInput = (String, String)
-type alias FormField =
-  { active : Bool
-  , dirty : Bool
-  , disabled : Bool
-  , name : String
-  , validator : String -> FieldType
-  , value : FieldType
-  }
-
-type alias FormState =
-  { dirty : Bool
-  , hasErrors : Bool
-  }
+import Form.Ports exposing (..)
+import Form.Types exposing (..)
+import Form.Validation exposing (..)
 
 makeStringField : String -> FieldType -> FormField
 makeStringField name value =
   FormField False False False name FTString value
 
+
 makeFloatField : String -> FieldType -> FormField
 makeFloatField name value =
   FormField False False False name typeForFieldFloat value
+
 
 updateFormFieldValue : (FieldType -> Bool) -> FieldType -> FormField -> Maybe FormField
 updateFormFieldValue validate value field =
@@ -37,24 +28,13 @@ updateFormFieldValue validate value field =
         |> Just
   else Nothing
 
+
 stringToFloat : String -> Float -> Float
 stringToFloat string fallback =
   case (String.toFloat string) of
     Ok f -> f
     Err _ -> fallback
 
--- IN
-port updateForm : (FormInput -> msg) -> Sub msg
--- OUT
-port formUpdated : ModelOut -> Cmd msg
-
-type alias ModelOut =
-  { fields : JEnc.Value }
-
-type alias Model = 
-  { fields : Dict String FormField 
-  , state : FormState
-  }
 
 initialModel =
   fromCustomer emptyCustomer
@@ -74,9 +54,6 @@ fromCustomer customer =
 
 initialCommand =
   formUpdated (encodeModel initialModel)
-
-type Msg
-  = UpdateFormField FormInput
 
 valueToField : String -> Maybe FormField -> Maybe FormField
 valueToField value maybeField =
