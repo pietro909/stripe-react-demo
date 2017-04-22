@@ -1,3 +1,26 @@
+export const expectedPorts = {
+	out: [
+		'customers',
+		'formUpdated',
+		'statusMessages',
+		'errors',
+		'destination',
+		'customerInTheEditor',
+		'navigateTo',
+		'selectors',
+	],
+	in: [
+		'updateList',
+		'updateForm',
+		'start',
+		'createCustomer',
+		'updateCustomer',
+		'deleteCustomer',
+		'selectCustomer',
+		'setRoute',
+	],
+}
+
 export function buildState({ incoming, outgoing }) {
   if (!incoming || !outgoing) {
     return {}

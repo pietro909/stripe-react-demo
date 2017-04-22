@@ -23,10 +23,32 @@ const genericLogger = logger => (label, data) => {
 }
 /* eslint-enable no-console */
 
+const checkPorts = (expected, actual) => {
+	const orphans = actual.slice(0)
+	const rest = expected.reduce((acc, p) => {
+		const index = orphans.indexOf(p)
+		if (index > -1) {
+			orphans.splice(index, 1)
+			return acc
+		}
+		return [ p, ...acc]
+	}, [])
+	if (rest.length > 0) {
+		throw new Error(
+			`Port(s) not found: ${rest.join(',')}
+		`)
+	}
+	if (orphans.length > 0) {
+		throw new Error(
+			`Unknown ports: ${orphans.join(',')}
+		`)
+	}
+}
+
 const noop = () => null
 
 const appWithElm =
-  ({ startMessage, debug }) => (WrappedComponent) => {
+  ({ startMessage, debug, expectedPorts }) => (WrappedComponent) => {
     /* eslint-disable no-console */
     const log = debug ? genericLogger(console.log) : noop
     const warn = debug ? genericLogger(console.warn) : noop
@@ -61,28 +83,16 @@ const appWithElm =
                 })
               port.subscribe(callback)
             } else if (port.subscribe) {
-              portsOut.push(portId)
-              if (portId === 'errors') {
-                port.subscribe(data => this.setState(() => {
-                  warn(`receive ${portId}`, data)
-                  return {
-                    incoming: {
-                      ...this.state.incoming,
-                      [portId]: data,
-                    },
-                  }
-                }))
-              } else {
-                port.subscribe(data => this.setState(() => {
-                  log(`receive ${portId}`, data)
-                  return {
-                    incoming: {
-                      ...this.state.incoming,
-                      [portId]: data,
-                    },
-                  }
-                }))
-              }
+							portsOut.push(portId)
+							port.subscribe(data => this.setState(() => {
+								log(`receive ${portId}`, data)
+								return {
+									incoming: {
+										...this.state.incoming,
+										[portId]: data,
+									},
+								}
+							}))
             } else if (port.send) {
               portsIn.push(portId)
               this.setState(() => ({
@@ -96,8 +106,13 @@ const appWithElm =
               }))
             }
           })
+
           log('Outgoing ports', portsOut)
           log('Incoming ports', portsIn)
+
+					checkPorts(expectedPorts.in, portsIn)
+					checkPorts(expectedPorts.out, portsOut)
+
           log('send start', startMessage)
           app.ports.start.send(startMessage)
         })
