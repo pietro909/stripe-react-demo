@@ -6,6 +6,7 @@ import Navigation
 import Models exposing (..)
 import Form.Types as FormTypes
 import CustomersList.Types as CustomersListTypes
+import Router.Types as RouterTypes
 
 type Msg
   = CreateCustomer
@@ -19,4 +20,4 @@ type Msg
   | SetRoute String
   | Start Config
   | UpdateCustomer
-  | UrlChange Navigation.Location
+  | RouterMsg RouterTypes.Msg

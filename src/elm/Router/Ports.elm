@@ -5,4 +5,4 @@ import Router.Types exposing (..)
 
 
 -- OUT
-port destination : Destination -> Cmd msg
+port destination : Model -> Cmd msg

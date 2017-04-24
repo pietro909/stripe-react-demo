@@ -8,6 +8,7 @@ export const expectedPorts = {
 		'customerInTheEditor',
 		'navigateTo',
 		'selectors',
+    'webLocation',
 	],
 	in: [
 		'updateList',

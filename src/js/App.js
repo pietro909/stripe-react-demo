@@ -7,6 +7,7 @@ import MainSection from './components/MainSection'
 
 import appWithElm from './framework/ElmApp'
 import { buildState, expectedPorts } from './framework/appState'
+import Link from './framework/Link'
 
 class TheApp extends Component {
   static propTypes = {
@@ -42,8 +43,8 @@ class TheApp extends Component {
     return (
         <article>
           <ul>
-            <li><a href="/">List</a></li>
-            <li><a href="/edit/1234">Form</a></li>
+            <li><Link to="/">List</Link></li>
+            <li><Link to="/edit/1234">Form</Link></li>
           </ul>
 
           <Header message={statusMessage.message} level={statusMessage.level} />

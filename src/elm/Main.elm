@@ -15,8 +15,8 @@ import Form.Ports as FormPorts
 import Form.Types as FormTypes
 import Form.Validation as Validation
 import Native.ExportFunction
-import Router.NavigationProgram
 import Router.Ports as RouterPorts
+import Router.Router as Router
 
 import Api exposing (..)
 import Messages exposing (..)
@@ -51,6 +51,7 @@ type alias Model =
   , config : Config
   , form : FormTypes.Model
   , router : Router
+  , history : List Navigation.Location
   }
 
 
@@ -61,6 +62,7 @@ initialModel =
   , config = Config ""
   , form = Form.initialModel
   , router = { path = "/" }
+  , history = []
   }
 
 -- takes an error msg, create a command to send it outside
@@ -73,6 +75,7 @@ initialCommand = Cmd.map FormMsg Form.initialCommand
 
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
+--init =
   ( initialModel, initialCommand )
 
 getFieldValue name extractor fields =
@@ -265,8 +268,13 @@ update msg model =
       in
         (newModel, Cmd.none)
 
-    UrlChange location ->
-      (model, Cmd.none)
+    RouterMsg msg ->
+      let
+        (subModel, subCmd) = Router.update msg model.router
+        newModel = { model | router = subModel }
+        cmd = Cmd.map RouterMsg subCmd
+      in
+        (newModel, cmd)
 
 updateRouter : Router -> String -> Router
 updateRouter router path =
@@ -289,8 +297,10 @@ subscriptions model =
 
 main : Program Never Model Msg
 main =
-  NavigationProgram.headlessProgram UrlChange
+  Navigation.headlessProgram UrlChange
+  --Platform.program
     { init = init
-    , update = update --actionLogger update
+    , update = actionLogger update
     , subscriptions = subscriptions
+    --, view = (\_ -> Html.text "")
     }

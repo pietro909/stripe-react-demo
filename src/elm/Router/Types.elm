@@ -1,7 +1,21 @@
 module Router.Types exposing (..)
 
 
-type alias Destination =
+import Navigation exposing (Location)
+
+
+type Route
+  = Home
+  | Edit String
+  | Create
+  | NotFound
+
+
+type alias Model =
   { path : String
-  , component : String
+  , page : String
   }
+
+type Msg
+  = ChangeLocation String
+  | LocationChanged Location
