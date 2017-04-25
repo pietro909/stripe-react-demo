@@ -1,6 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import Link from '../framework/Link'
+
 const Customer =
   ({
     balance,
@@ -9,10 +11,11 @@ const Customer =
     id,
     lastName,
     name,
+    navigateToUrl,
   }) => {
     const route = `/edit/${id}`
     return <li className="customer">
-      <a href={route}>Edit</a>
+      <Link to={route} onUrl={navigateToUrl}>Edit</Link>
       <span>{name}</span>
       <span>{lastName}</span>
       <span>{balance}</span>

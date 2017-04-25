@@ -8,7 +8,6 @@ export const expectedPorts = {
 		'customerInTheEditor',
 		'navigateTo',
 		'selectors',
-    'webLocation',
 	],
 	in: [
 		'updateList',
@@ -19,6 +18,7 @@ export const expectedPorts = {
 		'deleteCustomer',
 		'selectCustomer',
 		'setRoute',
+    'navigateToUrl',
 	],
 }
 
@@ -34,6 +34,7 @@ export function buildState({ incoming, outgoing }) {
     updateCustomer,
     updateForm,
     updateList,
+    navigateToUrl,
   } = outgoing
   const {
     customers,
@@ -55,5 +56,6 @@ export function buildState({ incoming, outgoing }) {
     updateCustomer,
     updateFormField: updateForm ? (name, value) => updateForm([name, value]) : null,
     updateList,
+    navigateToUrl,
   }
 }

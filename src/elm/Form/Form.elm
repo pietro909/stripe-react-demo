@@ -39,6 +39,18 @@ stringToFloat string fallback =
 initialModel =
   fromCustomer emptyCustomer
 
+
+fillForm : Customer -> (Model, Cmd Msg)
+fillForm customer =
+  let
+    model = fromCustomer customer
+    cmd =
+      encodeModel model
+      |> Ports.formUpdated
+  in
+    (model, cmd)
+
+
 fromCustomer : Customer -> Model
 fromCustomer customer =
   { fields =

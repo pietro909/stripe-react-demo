@@ -37,29 +37,33 @@ class TheApp extends Component {
       updateCustomer,
       updateFormField,
       destination,
+      navigateToUrl,
     } = this.state
-    const { component } = destination
+    const { page } = destination || {}
 
     return (
         <article>
           <ul>
-            <li><Link to="/">List</Link></li>
-            <li><Link to="/edit/1234">Form</Link></li>
+            <li><Link to="/" onUrl={navigateToUrl}>List</Link></li>
+            <li><Link to="/edit/1234" onUrl={navigateToUrl}>Form</Link></li>
           </ul>
 
           <Header message={statusMessage.message} level={statusMessage.level} />
 
           <div className="row">
 
+            { !page &&
+              <h1>Component is undefined</h1>
+            }
 
-            { component === 'List' &&
+            { page === 'List' &&
                   <MainSection
                     customers={customers}
-                    selectCustomer={selectCustomer}
+                    navigateToUrl={navigateToUrl}
                   />
             }
 
-            { component === 'Form' &&
+            { page === 'Form' &&
                   <AsideToolbar
                     createCustomer={createCustomer}
                     deleteCustomer={deleteCustomer}
@@ -70,7 +74,7 @@ class TheApp extends Component {
                   />
             }
 
-            { component === 'NotFound' &&
+            { page === 'NotFound' &&
                   <h1>404 Not found</h1>
             }
 

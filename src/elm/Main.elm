@@ -17,6 +17,12 @@ import Form.Validation as Validation
 import Native.ExportFunction
 import Router.Ports as RouterPorts
 import Router.Router as Router
+import Router.Router as Router
+import Router.Types as RouterTypes
+
+import Api exposing (..)
+import Messages exposing (..)
+import Models exposing (..)
 
 import Api exposing (..)
 import Messages exposing (..)
@@ -50,20 +56,10 @@ type alias Model =
   , customerInTheEditor : Customer
   , config : Config
   , form : FormTypes.Model
-  , router : Router
+  , router : RouterTypes.Model
   , history : List Navigation.Location
   }
 
-
-initialModel : Model
-initialModel =
-  { customersList = CustomersList.initialModel
-  , customerInTheEditor = emptyCustomer
-  , config = Config ""
-  , form = Form.initialModel
-  , router = { path = "/" }
-  , history = []
-  }
 
 -- takes an error msg, create a command to send it outside
 errorHub : List String -> List (Cmd Msg)
@@ -75,8 +71,23 @@ initialCommand = Cmd.map FormMsg Form.initialCommand
 
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
---init =
-  ( initialModel, initialCommand )
+  let
+    (routerModel, routerCmd) =
+      Router.update ( RouterTypes.LocationChanged location)
+        <| Router.initialModel location
+    initialModel : Model
+    initialModel =
+      { customersList = CustomersList.initialModel
+      , customerInTheEditor = emptyCustomer
+      , config = Config ""
+      , form = Form.initialModel
+      , router = Router.initialModel location
+      , history = []
+      }
+    initialCommand =
+      Cmd.batch [ Cmd.map RouterMsg routerCmd ]
+  in
+    ( initialModel, initialCommand )
 
 getFieldValue name extractor fields =
   Dict.get name fields
@@ -131,13 +142,14 @@ update msg model =
             ( StatusMessage "Welcome to version 0.1" 1
             , Cmd.map CustomersListMsg <| CustomersList.fetchAll config.apiKey
             )
+        --(routerModel, routerCmd) = Router.init model.router.location
         cmd = Cmd.batch
           [ statusMessages message
           , started True
-          , RouterPorts.destination { path = "/", component = "List" }
+          --, Cmd.map RouterMsg routerCmd
           , startCmd
           ]
-        newModel = { model | config = config }
+        newModel = { model | config = config } --, router = routerModel }
       in
         (newModel, cmd)
 
@@ -194,18 +206,14 @@ update msg model =
             Just customer ->
               let
                 form = Form.fromCustomer customer
-                newModel = Debug.log "just" { model | form = form }
+                newModel = { model | form = form }
                 formCmd =
                   Form.encodeModel form
                     |> FormPorts.formUpdated
                     |> Cmd.map FormMsg
                 message = statusMessages <| StatusMessage ("Selected #" ++ customer.id) 1
-                navigationCmd =
-                  navigateTo ("/edit/"++customer.id)
-
-                -- TODO: doesn't work
                 cmd = Cmd.batch
-                  [ formCmd, message, navigationCmd ]
+                  [ formCmd, message ]
               in
                 (newModel, cmd)
 
@@ -217,10 +225,8 @@ update msg model =
                   Form.encodeModel newModel.form
                     |> FormPorts.formUpdated
                     |> Cmd.map FormMsg
-                navigationCmd =
-                  navigateTo "/404"
               in
-                ( newModel, Cmd.batch [ cmd, navigationCmd ])
+                ( newModel, Cmd.batch [ cmd ])
       in
         (newModel, cmd)
     CustomerCreated id ->
@@ -251,7 +257,6 @@ update msg model =
       in
         (newModel, cmd)
 
-
     FormMsg msg ->
       let
         (subModel, subCmd) = Form.update msg model.form
@@ -260,25 +265,44 @@ update msg model =
       in
         (newModel, cmd)
 
-    SetRoute path ->
-      -- TODO: just tracking the route's change here
-      let
-        router = updateRouter model.router path
-        newModel = { model | router = router }
-      in
-        (newModel, Cmd.none)
-
     RouterMsg msg ->
-      let
-        (subModel, subCmd) = Router.update msg model.router
-        newModel = { model | router = subModel }
-        cmd = Cmd.map RouterMsg subCmd
-      in
-        (newModel, cmd)
+      handleRouterMsg msg model
 
-updateRouter : Router -> String -> Router
-updateRouter router path =
-  { path = path }
+    FirstRoute location ->
+      handleRouterMsg (RouterTypes.LocationChanged location) model
+
+
+goto404 : Cmd Msg
+goto404 =
+  Navigation.newUrl "404"
+
+
+formMsgToMsg : (m, Cmd FormTypes.Msg) -> (m, Cmd Msg)
+formMsgToMsg (m, formMsg) =
+  let cmd = Cmd.map FormMsg formMsg
+  in (m, cmd)
+
+handleRouterMsg : RouterTypes.Msg -> Model -> (Model, Cmd Msg)
+handleRouterMsg msg model =
+  let
+    (routerModel, routerCmd) = Router.update msg model.router
+    (formModel, dataCmd) =
+      case msg of
+        RouterTypes.LocationChanged location ->
+          case routerModel.route of
+            RouterTypes.Edit id ->
+              CustomersList.findById id model.customersList
+              |> Maybe.map (\c -> formMsgToMsg (Form.fillForm c))
+              |> Maybe.withDefault (Form.initialModel, goto404)
+            _ -> (model.form, Cmd.none)
+        _ -> (model.form, Cmd.none)
+    newModel = { model | router = routerModel, form = formModel }
+    cmd =
+      Cmd.batch
+        [ Cmd.map RouterMsg routerCmd ]
+  in
+    (newModel, cmd)
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -288,7 +312,7 @@ subscriptions model =
     , updateCustomer (\_ -> UpdateCustomer)
     , selectCustomer SelectCustomer
     , start Start
-    , setRoute SetRoute
+    , Sub.map RouterMsg (Router.subscriptions model.router)
     , Sub.map CustomersListMsg
         <| CustomersList.subscriptions model.customersList
     , Sub.map FormMsg (Form.subscriptions model.form)
@@ -297,8 +321,7 @@ subscriptions model =
 
 main : Program Never Model Msg
 main =
-  Navigation.headlessProgram UrlChange
-  --Platform.program
+  Navigation.headlessProgram FirstRoute
     { init = init
     , update = actionLogger update
     , subscriptions = subscriptions

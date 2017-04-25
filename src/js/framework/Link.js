@@ -1,16 +1,17 @@
 import React from 'react'
 
-const clickHandler = href => e  => {
-  e.preventDefault()
-  console.log(`clicked ${href}`)
-  console.log(e.target.href)
-}
+
 
 const Link = ({
   text,
   to,
   children,
+  onUrl,
 }) => {
+  const clickHandler = href => e  => {
+    e.preventDefault()
+    onUrl(e.target.href)
+  }
   if (text) {
     return <a href={to} onClick={clickHandler(to)}>{text}</a>
   }

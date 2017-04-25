@@ -13,9 +13,17 @@ type Route
 
 type alias Model =
   { path : String
+  , route : Route
+  , location : Navigation.Location
+  }
+
+type alias ModelOut =
+  { path : String
   , page : String
+  , location : Navigation.Location
   }
 
 type Msg
   = ChangeLocation String
   | LocationChanged Location
+

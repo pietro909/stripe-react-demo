@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Customer from './Customer'
 
 const MainSection =
-  ({ customers, selectCustomer }) =>
+  ({ customers, navigateToUrl }) =>
     <section className="col-sm-8 main">
       <ul>
         {customers.map(customer =>
@@ -16,7 +16,7 @@ const MainSection =
             email={customer.email}
             description={customer.description}
             balance={customer.balance}
-            onClick={() => selectCustomer(customer.id)}
+            navigateToUrl={navigateToUrl}
           />
         )}
       </ul>
@@ -24,7 +24,7 @@ const MainSection =
 
 MainSection.propTypes = {
   customers: PropTypes.array.isRequired,
-  selectCustomer: PropTypes.func.isRequired,
+  navigateToUrl: PropTypes.func.isRequired,
 }
 
 export default MainSection
