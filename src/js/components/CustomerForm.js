@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import Input from './Input'
 
 const CustomerForm = ({
-  cleanFields,
   createCustomer,
   deleteCustomer,
   model,
@@ -79,7 +78,7 @@ const CustomerForm = ({
         <button type="submit" className="btn btn-default">
           {isUpdate ? 'Update' : 'Submit'}
         </button>
-        <button type="button" className="btn btn-primary" onClick={cleanFields}>
+        <button type="button" className="btn btn-primary" >
           Clear Values
         </button>
         <button
@@ -94,7 +93,6 @@ const CustomerForm = ({
 }
 
 CustomerForm.propTypes = {
-  cleanFields: PropTypes.func.isRequired,
   createCustomer: PropTypes.func.isRequired,
   deleteCustomer: PropTypes.func.isRequired,
   model: PropTypes.object.isRequired,

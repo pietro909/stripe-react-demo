@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
 import Header from './components/Header'
-import AsideToolbar from './components/AsideToolbar'
-import MainSection from './components/MainSection'
+import Edit from './pages/Edit'
+import List from './pages/List'
 
 import appWithElm from './framework/ElmApp'
 import { buildState, expectedPorts } from './framework/appState'
@@ -31,9 +31,7 @@ class TheApp extends Component {
       customers,
       deleteCustomer,
       formUpdated,
-      selectCustomer,
       statusMessage,
-      unselectCustomer,
       updateCustomer,
       updateFormField,
       destination,
@@ -45,7 +43,8 @@ class TheApp extends Component {
         <article>
           <ul>
             <li><Link to="/" onUrl={navigateToUrl}>List</Link></li>
-            <li><Link to="/edit/1234" onUrl={navigateToUrl}>Form</Link></li>
+            <li><Link to="/create" onUrl={navigateToUrl}>Create</Link></li>
+            <li><Link to="/edit/1234" onUrl={navigateToUrl}>Failing Edit</Link></li>
           </ul>
 
           <Header message={statusMessage.message} level={statusMessage.level} />
@@ -57,18 +56,17 @@ class TheApp extends Component {
             }
 
             { page === 'List' &&
-                  <MainSection
+                  <List
                     customers={customers}
                     navigateToUrl={navigateToUrl}
                   />
             }
 
             { page === 'Form' &&
-                  <AsideToolbar
+                  <Edit
                     createCustomer={createCustomer}
                     deleteCustomer={deleteCustomer}
                     selectedCustomer={formUpdated}
-                    unselectCustomer={unselectCustomer}
                     updateCustomer={updateCustomer}
                     updateForm={updateFormField}
                   />

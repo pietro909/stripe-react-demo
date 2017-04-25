@@ -1,18 +1,16 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import CustomerForm from './CustomerForm'
+import CustomerForm from '../components/CustomerForm'
 
-const AsideToolbar = ({
+const Edit = ({
   createCustomer,
   deleteCustomer,
   selectedCustomer,
-  unselectCustomer,
   updateCustomer,
   updateForm,
 }) =>
   <aside className="col-sm-4">
     <CustomerForm
-      cleanFields={unselectCustomer}
       deleteCustomer={deleteCustomer}
       model={selectedCustomer}
       createCustomer={createCustomer}
@@ -21,13 +19,12 @@ const AsideToolbar = ({
     />
   </aside>
 
-AsideToolbar.propTypes = {
+Edit.propTypes = {
   createCustomer: PropTypes.func.isRequired,
   deleteCustomer: PropTypes.func.isRequired,
   selectedCustomer: PropTypes.object.isRequired,
-  unselectCustomer: PropTypes.func.isRequired,
   updateCustomer: PropTypes.func.isRequired,
   updateForm: PropTypes.func.isRequired,
 }
 
-export default AsideToolbar
+export default Edit

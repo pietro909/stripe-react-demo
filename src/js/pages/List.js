@@ -1,9 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import Customer from './Customer'
+import Customer from '../components/Customer'
 
-const MainSection =
+const List =
   ({ customers, navigateToUrl }) =>
     <section className="col-sm-8 main">
       <ul>
@@ -22,9 +22,9 @@ const MainSection =
       </ul>
     </section>
 
-MainSection.propTypes = {
+List.propTypes = {
   customers: PropTypes.array.isRequired,
   navigateToUrl: PropTypes.func.isRequired,
 }
 
-export default MainSection
+export default List

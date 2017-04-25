@@ -42,7 +42,6 @@ port start : (Config -> msg) -> Sub msg
 port createCustomer : (() -> msg) -> Sub msg
 port updateCustomer : (() -> msg) -> Sub msg
 port deleteCustomer : (() -> msg) -> Sub msg
-port selectCustomer : (String -> msg) -> Sub msg
 port setRoute : (String -> msg) -> Sub msg
 
 
@@ -198,49 +197,20 @@ update msg model =
       in
         ( model, cmd )
 
-    SelectCustomer id ->
-      let
-        maybeCustomer = CustomersList.findById id model.customersList
-        (newModel, cmd) =
-          case maybeCustomer of
-            Just customer ->
-              let
-                form = Form.fromCustomer customer
-                newModel = { model | form = form }
-                formCmd =
-                  Form.encodeModel form
-                    |> FormPorts.formUpdated
-                    |> Cmd.map FormMsg
-                message = statusMessages <| StatusMessage ("Selected #" ++ customer.id) 1
-                cmd = Cmd.batch
-                  [ formCmd, message ]
-              in
-                (newModel, cmd)
-
-            Nothing ->
-              let
-                newModel =
-                  { model | form = Form.initialModel }
-                cmd =
-                  Form.encodeModel newModel.form
-                    |> FormPorts.formUpdated
-                    |> Cmd.map FormMsg
-              in
-                ( newModel, Cmd.batch [ cmd ])
-      in
-        (newModel, cmd)
     CustomerCreated id ->
       let
         subCmd = CustomersList.fetchAll model.config.apiKey
         cmd = Cmd.map CustomersListMsg subCmd
       in
         (model, cmd)
+
     CustomerDeleted id ->
       let
         subCmd = CustomersList.fetchAll model.config.apiKey
         cmd = Cmd.map CustomersListMsg subCmd
       in
         (model, cmd)
+
     CustomerUpdated customer ->
       let
         subCmd = CustomersList.fetchAll model.config.apiKey
@@ -268,38 +238,61 @@ update msg model =
     RouterMsg msg ->
       handleRouterMsg msg model
 
-    FirstRoute location ->
-      handleRouterMsg (RouterTypes.LocationChanged location) model
-
 
 goto404 : Cmd Msg
 goto404 =
   Navigation.newUrl "404"
 
 
-formMsgToMsg : (m, Cmd FormTypes.Msg) -> (m, Cmd Msg)
-formMsgToMsg (m, formMsg) =
-  let cmd = Cmd.map FormMsg formMsg
-  in (m, cmd)
+customerToModelCmd : Model -> Customer -> (Model, Cmd Msg)
+customerToModelCmd model customer =
+  let
+    (subModel, subCmd) = Form.fillForm customer
+    cmd = Cmd.map FormMsg subCmd
+    newModel = { model | form = subModel }
+  in
+    (newModel, cmd)
+
+
+findCustomerByIdOr404 : String -> Model -> (Model, Cmd Msg)
+findCustomerByIdOr404 id model =
+  CustomersList.findById id model.customersList
+  |> Maybe.map (customerToModelCmd model)
+  |> Maybe.withDefault ({ model | form = Form.initialModel}, goto404)
+
+
+locationUpdate : Navigation.Location -> Model -> (Model, Cmd Msg)
+locationUpdate location model =
+  let
+    (subModel, subCmd) = Router.onLocationChange location
+    newModel = { model | router = subModel }
+    cmd = Cmd.map RouterMsg subCmd
+  in
+    (newModel, cmd)
+
 
 handleRouterMsg : RouterTypes.Msg -> Model -> (Model, Cmd Msg)
 handleRouterMsg msg model =
   let
     (routerModel, routerCmd) = Router.update msg model.router
-    (formModel, dataCmd) =
+    (foundModel, dataCmd) =
       case msg of
         RouterTypes.LocationChanged location ->
           case routerModel.route of
             RouterTypes.Edit id ->
-              CustomersList.findById id model.customersList
-              |> Maybe.map (\c -> formMsgToMsg (Form.fillForm c))
-              |> Maybe.withDefault (Form.initialModel, goto404)
-            _ -> (model.form, Cmd.none)
-        _ -> (model.form, Cmd.none)
-    newModel = { model | router = routerModel, form = formModel }
+              findCustomerByIdOr404 id model
+            RouterTypes.Create ->
+              customerToModelCmd model emptyCustomer
+            _ ->
+              locationUpdate location model
+        _ ->
+          (model, Cmd.none)
+    newModel = { foundModel | router = routerModel }
     cmd =
       Cmd.batch
-        [ Cmd.map RouterMsg routerCmd ]
+        [ Cmd.map RouterMsg routerCmd
+        , dataCmd
+        ]
   in
     (newModel, cmd)
 
@@ -310,7 +303,6 @@ subscriptions model =
     [ createCustomer (\_ -> CreateCustomer)
     , deleteCustomer (\_ -> DeleteCustomer)
     , updateCustomer (\_ -> UpdateCustomer)
-    , selectCustomer SelectCustomer
     , start Start
     , Sub.map RouterMsg (Router.subscriptions model.router)
     , Sub.map CustomersListMsg
@@ -321,9 +313,8 @@ subscriptions model =
 
 main : Program Never Model Msg
 main =
-  Navigation.headlessProgram FirstRoute
+  Navigation.headlessProgram (\l -> RouterMsg <| RouterTypes.LocationChanged l)
     { init = init
     , update = actionLogger update
     , subscriptions = subscriptions
-    --, view = (\_ -> Html.text "")
     }

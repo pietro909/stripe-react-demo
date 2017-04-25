@@ -17,8 +17,6 @@ type Msg
   | CustomersListMsg CustomersListTypes.Msg
   | DeleteCustomer
   | FormMsg FormTypes.Msg
-  | SelectCustomer String
   | Start Config
   | UpdateCustomer
   | RouterMsg RouterTypes.Msg
-  | FirstRoute Navigation.Location

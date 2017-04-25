@@ -54,6 +54,18 @@ routeToString route =
       "NotFound"
 
 
+onLocationChange : Navigation.Location -> (Model, Cmd Msg)
+onLocationChange location =
+  let
+      newRoute = parseLocation location
+      newModel = Model location.pathname newRoute location
+      cmd =
+        ModelOut newModel.path (routeToString newModel.route) newModel.location
+        |> Ports.destination
+  in
+      (newModel, cmd)
+
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
@@ -69,6 +81,7 @@ update msg model =
             |> Ports.destination
       in
           (newModel, cmd)
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
