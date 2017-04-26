@@ -1,20 +1,40 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import {
+  Page,
+  Toolbar,
+  Button,
+  BackButton,
+  ToolbarButton,
+  Icon,
+} from 'react-onsenui'
 
 const alertLevels = ['success', 'warning', 'danger']
+/*
+          <ul>
+            <li><Link to="/" onUrl={navigateToUrl}>List</Link></li>
+            <li><Link to="/create" onUrl={navigateToUrl}>Create</Link></li>
+            <li><Link to="/edit/1234" onUrl={navigateToUrl}>Failing Edit</Link></li>
+          </ul>
+  */
 
 const Header =
-  ({ message = '', level = 1 }) =>
-    <header className="header row">
-      <h1 className="col-sm-4">Customers</h1>
-      { message &&
-        <div className="col-sm-4">
-          <div
-            className={`alert alert-${alertLevels[level - 1]}`}
-          >{ message }</div>
-        </div>
-      }
-    </header>
+  ({ message = '', level = 1 }) => {
+
+  return (
+    <Toolbar>
+      <div className="left">
+        <BackButton>Back</BackButton>
+      </div>
+      <div className="center">{message}</div>
+      <div className="right">
+        <ToolbarButton>
+          <Icon icon="md-menu" />
+        </ToolbarButton>
+      </div>
+    </Toolbar>
+  )
+}
 
 Header.propTypes = {
   message: PropTypes.string,

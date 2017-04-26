@@ -1,6 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-
+import {
+  Page,
+  Toolbar,
+  Button,
+  BackButton,
+  ToolbarButton,
+  Icon,
+  Switch,
+} from 'react-onsenui'
 import Link from '../framework/Link'
 
 const Customer =
@@ -14,14 +22,20 @@ const Customer =
     navigateToUrl,
   }) => {
     const route = `/edit/${id}`
-    return <li className="customer">
-      <Link to={route} onUrl={navigateToUrl}>Edit</Link>
-      <span>{name}</span>
-      <span>{lastName}</span>
-      <span>{balance}</span>
-      <span>{email}</span>
-      <span>{description}</span>
-    </li>
+    return (
+      <Link to={route} onUrl={() => navigateToUrl(route)} id={id}>
+        <div className="left">
+          <Icon icon="md-face" className="list-item__icon" />
+        </div>
+        <div className="center">
+          <span className="list-item__title">{name}</span>
+          <span className="list-item__subtitle">lastName</span>
+        </div>
+        <label className="right">
+          <span className="list-item__subtitle">{balance}</span>
+        </label>
+      </Link>
+    )
   }
 
 Customer.propTypes = {

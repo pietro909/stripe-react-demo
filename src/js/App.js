@@ -1,13 +1,23 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+// import ons from 'onsenui'
+import {
+  Page,
+  Toolbar,
+  Button,
+  BackButton,
+  ToolbarButton,
+  Icon,
+} from 'react-onsenui'
 
 import Header from './components/Header'
 import Edit from './pages/Edit'
-import List from './pages/List'
+import CustomersList from './pages/CustomersList'
 
 import appWithElm from './framework/ElmApp'
 import { buildState, expectedPorts } from './framework/appState'
 import Link from './framework/Link'
+
 
 class TheApp extends Component {
   static propTypes = {
@@ -40,14 +50,7 @@ class TheApp extends Component {
     const { page } = destination || {}
 
     return (
-        <article>
-          <ul>
-            <li><Link to="/" onUrl={navigateToUrl}>List</Link></li>
-            <li><Link to="/create" onUrl={navigateToUrl}>Create</Link></li>
-            <li><Link to="/edit/1234" onUrl={navigateToUrl}>Failing Edit</Link></li>
-          </ul>
-
-          <Header message={statusMessage.message} level={statusMessage.level} />
+        <Page renderToolbar={Header} >
 
           <div className="row">
 
@@ -56,7 +59,7 @@ class TheApp extends Component {
             }
 
             { page === 'List' &&
-                  <List
+                  <CustomersList
                     customers={customers}
                     navigateToUrl={navigateToUrl}
                   />
@@ -77,7 +80,7 @@ class TheApp extends Component {
             }
 
           </div>
-        </article>
+        </Page>
     )
   }
 }
