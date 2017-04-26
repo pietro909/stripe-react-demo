@@ -4,7 +4,7 @@ import { applyMiddleware, combineReducers, createStore } from 'redux';
 import { reducer as formReducer } from 'redux-form'
 import { render } from 'react-dom'
 import thunkMiddleware from 'redux-thunk'
-import createLogger from 'redux-logger'
+import { createLogger } from 'redux-logger'
 
 import customers from './reducers/customers'
 import App from './App'
