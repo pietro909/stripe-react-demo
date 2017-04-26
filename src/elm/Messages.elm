@@ -11,6 +11,7 @@ import Router.Types as RouterTypes
 
 type Msg
   = CreateCustomer
+  | CustomerFound (Result Http.Error Customer)
   | CustomerCreated (Result Http.Error Customer)
   | CustomerDeleted (Result Http.Error String)
   | CustomerUpdated (Result Http.Error Customer)

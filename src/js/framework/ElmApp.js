@@ -34,12 +34,12 @@ const checkPorts = (expected, actual) => {
 		return [ p, ...acc]
 	}, [])
 	if (rest.length > 0) {
-		throw new Error(
+		console.error(
 			`Port(s) not found: ${rest.join(',')}
 		`)
 	}
 	if (orphans.length > 0) {
-		throw new Error(
+		console.error(
 			`Unknown ports: ${orphans.join(',')}
 		`)
 	}

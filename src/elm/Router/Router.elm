@@ -76,6 +76,7 @@ update msg model =
       let
           newRoute = parseLocation location
           newModel = Model location.pathname newRoute location
+-- TODO: must retrieve the customer
           cmd =
             ModelOut newModel.path (routeToString newModel.route) newModel.location
             |> Ports.destination

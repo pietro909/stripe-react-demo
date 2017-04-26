@@ -32,7 +32,6 @@ import Models exposing (..)
 port statusMessages : StatusMessage -> Cmd msg
 port errors : String -> Cmd msg
 
-port customerInTheEditor : Customer -> Cmd msg
 port started : Bool -> Cmd msg
 port navigateTo : String -> Cmd msg
 port selectors : List String -> Cmd msg
@@ -52,7 +51,7 @@ type alias StatusMessage =
 
 type alias Model =
   { customersList : CustomersListTypes.Model
-  , customerInTheEditor : Customer
+  , selectedCustomerId: Maybe String
   , config : Config
   , form : FormTypes.Model
   , router : RouterTypes.Model
@@ -77,7 +76,7 @@ init location =
     initialModel : Model
     initialModel =
       { customersList = CustomersList.initialModel
-      , customerInTheEditor = emptyCustomer
+      , selectedCustomerId = Nothing
       , config = Config ""
       , form = Form.initialModel
       , router = Router.initialModel location
@@ -141,17 +140,23 @@ update msg model =
             ( StatusMessage "Welcome to version 0.1" 1
             , Cmd.map CustomersListMsg <| CustomersList.fetchAll config.apiKey
             )
-        --(routerModel, routerCmd) = Router.init model.router.location
         cmd = Cmd.batch
           [ statusMessages message
           , started True
-          --, Cmd.map RouterMsg routerCmd
           , startCmd
           ]
         newModel = { model | config = config } --, router = routerModel }
       in
         (newModel, cmd)
 
+    CustomerFound result ->
+      case result of
+        Ok customer ->
+          -- update the form
+          customerToModelCmd model customer
+          -- send the form out
+        Err e ->
+          (model, goto404)
 
     CreateCustomer ->
       let
@@ -197,21 +202,21 @@ update msg model =
       in
         ( model, cmd )
 
-    CustomerCreated id ->
+    CustomerCreated result ->
       let
         subCmd = CustomersList.fetchAll model.config.apiKey
         cmd = Cmd.map CustomersListMsg subCmd
       in
         (model, cmd)
 
-    CustomerDeleted id ->
+    CustomerDeleted result ->
       let
         subCmd = CustomersList.fetchAll model.config.apiKey
         cmd = Cmd.map CustomersListMsg subCmd
       in
         (model, cmd)
 
-    CustomerUpdated customer ->
+    CustomerUpdated result ->
       let
         subCmd = CustomersList.fetchAll model.config.apiKey
         cmd = Cmd.map CustomersListMsg subCmd
@@ -258,7 +263,9 @@ findCustomerByIdOr404 : String -> Model -> (Model, Cmd Msg)
 findCustomerByIdOr404 id model =
   CustomersList.findById id model.customersList
   |> Maybe.map (customerToModelCmd model)
-  |> Maybe.withDefault ({ model | form = Form.initialModel}, goto404)
+  |> Maybe.withDefault ({ model | form = Form.initialModel}, Api.edit model.config.apiKey id)
+  --|> Maybe.withDefault ({ model | form = Form.initialModel}, goto404)
+  -- TODO: if not in the list, try to call the server. If fails, 404
 
 
 locationUpdate : Navigation.Location -> Model -> (Model, Cmd Msg)

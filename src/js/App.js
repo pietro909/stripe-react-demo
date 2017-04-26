@@ -62,7 +62,7 @@ class TheApp extends Component {
                   />
             }
 
-            { page === 'Form' &&
+            { page === 'Form' && formUpdated &&
                   <Edit
                     createCustomer={createCustomer}
                     deleteCustomer={deleteCustomer}

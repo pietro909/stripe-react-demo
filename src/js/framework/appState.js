@@ -5,7 +5,6 @@ export const expectedPorts = {
 		'statusMessages',
 		'errors',
 		'destination',
-		'customerInTheEditor',
 		'navigateTo',
 		'selectors',
 	],

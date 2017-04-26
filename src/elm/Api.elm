@@ -5,6 +5,7 @@ module Api exposing (
   delete,
   errorExtractor,
   makeRequest,
+  edit,
   update)
 
 import Http exposing (..)
@@ -99,5 +100,11 @@ delete token customer =
   Json.Decode.at [ "id" ] string
     |> makeRequest token "delete" (urlWithId customer.id) Http.emptyBody
     |> Http.send CustomerDeleted
+
+edit : String -> String -> Cmd Msg
+edit token id =
+  customerDecoder
+  |> makeRequest token "get" (urlWithId id) Http.emptyBody
+  |> Http.send CustomerFound
 
 
